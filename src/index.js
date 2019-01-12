@@ -60,7 +60,7 @@ class App extends Component {
   }
 
   basename(path) {
-    return this._basenameRegex.exec(path)[1];
+    return path === '/' || path === '' ? '/' : this._basenameRegex.exec(path)[1];
   }
 
   isFile(path) {
