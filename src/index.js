@@ -255,7 +255,7 @@ class App extends Component {
           </main>
           <footer className="py-4 bg-light d-none d-xl-block d-lg-block d-md-none d-sm-none border-top">
             <div className="row mx-auto mt-2 mb-4" style={{maxWidth: '360px'}}>
-              <div className="col"><a href="www.linkedin.com/in/norbert-logiewa" className="btn btn-sm btn-secondary">LinkedIn</a></div>
+              <div className="col"><a href="https://www.linkedin.com/in/norbert-logiewa" className="btn btn-sm btn-secondary">LinkedIn</a></div>
               <div className="col"><a href="https://github.com/nl253" className="btn btn-sm btn-secondary">GitHub</a></div>
               <div className="col"><a href="https://docs.google.com/document/d/1I94ZHc_75a2ivyjcDXjESIrGYPmJUriTm3xmEkcwaeI/edit?usp=sharing" className="btn btn-sm btn-secondary">CV</a></div>
               <div className="col"><a href="https://portfolio-nl.herokuapp.com" className="btn btn-sm btn-secondary">Portfolio</a></div>
