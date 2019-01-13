@@ -151,7 +151,7 @@ class App extends Component {
   render() {
     return (
         <div>
-          <header className="container-fluid bg-light"
+          <header className="container-fluid bg-light border-bottom"
                   style={{padding: '0 19vw'}}>
             <button onMouseOver={() => {
               const el = document.querySelector('header > button');
@@ -253,9 +253,14 @@ class App extends Component {
                 : <div className="col-xl-1 col-lg-1 d-none d-xl-block d-lg-block d-md-none d-sm-none"/>
             }
           </main>
-          <hr style={{maxWidth: '75vw'}}/>
-          <footer className="text-center pb-4">
-            Copyright &copy; Norbert Logiewa {this.year}
+          <footer className="py-4 bg-light d-none d-xl-block d-lg-block d-md-none d-sm-none border-top">
+            <div className="row mx-auto mt-2 mb-4" style={{maxWidth: '360px'}}>
+              <div className="col"><button className="btn btn-sm btn-secondary">LinkedIn</button></div>
+              <div className="col"><button className="btn btn-sm btn-secondary">GitHub</button></div>
+              <div className="col"><button className="btn btn-sm btn-secondary">CV</button></div>
+              <div className="col"><button className="btn btn-sm btn-secondary">Portfolio</button></div>
+            </div>
+            <p className="text-center">Copyright &copy; Norbert Logiewa {this.year}</p>
           </footer>
         </div>
     );
