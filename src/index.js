@@ -14,8 +14,7 @@ import ReactDOM from 'react-dom';
 import './index.scss';
 import * as serviceWorker from './serviceWorker';
 import {basename, dirname, isFile, join, splitDirsFiles} from './pathUtils';
-import {fmtHeading} from './fmtUtils';
-import {randStep} from './utils';
+import {randStep, fmtHeading} from './utils';
 
 class App extends Component {
   constructor(props) {
@@ -33,14 +32,15 @@ class App extends Component {
       postTextCache: {},
       postText: '',
     };
+    this.year = new Date(Date.now()).getFullYear().toString();
     this.absCategory = this.absCategory.bind(this);
     this.absPost = this.absPost.bind(this);
     this.relCategory = this.relCategory.bind(this);
     this.relPost = this.relPost.bind(this);
     if (window.location.pathname !== '' && isFile(window.location.pathname)) {
-      const filePath = window.location.pathname;
+      const postPath = window.location.pathname;
       this.absCategory(dirname(window.location.pathname));
-      this.absPost(filePath);
+      this.absPost(postPath);
     } else {
       // noinspection JSIgnoredPromiseFromCall
       this.absCategory(window.location.pathname === '' ? '/' : window.location.pathname);
@@ -152,8 +152,16 @@ class App extends Component {
     return (
         <div>
           <header className="container-fluid bg-light"
-                  style={{padding: '5px 19vw'}}>
-            <button onMouseOver={() => document.querySelector('header > button').style.borderBottom = '2px solid #c83ec8'} onMouseOut={() => document.querySelector('header > button').style.borderBottom = 'none'} onClick={() => this.absCategory('/')} className="d-block mx-auto h1 btn btn-lg" style={{fontSize: '2rem'}}>
+                  style={{padding: '0 19vw'}}>
+            <button onMouseOver={() => {
+              const el = document.querySelector('header > button');
+              // el.classList.add('text-warning');
+              el.style.textShadow = '0 0 8px darkgrey';
+            }} onMouseOut={() => {
+              const el = document.querySelector('header > button');
+              // el.classList.remove('text-warning');
+              el.style.textShadow = 'inherit';
+            }} onClick={() => this.absCategory('/')} className="d-block mx-auto h1 btn btn-lg" style={{fontSize: '3rem'}}>
               Blog
             </button>
           </header>
@@ -173,7 +181,7 @@ class App extends Component {
               {this.state.parentCategories.length > 0 && (
                   <nav>
                     {this.state.parentCategories.map((c, idx) =>
-                        <button onClick={() => this.relCategory(join('..', c))} key={idx} className="d-block btn btn-link mx-auto">
+                        <button onClick={() => this.relCategory(join('..', c))} key={idx} className={`d-block btn mx-auto ${this.state.category.endsWith(c) ? 'btn-warning' : 'btn-link'}`}>
                           {fmtHeading(c)}
                         </button>
                     )}
@@ -185,7 +193,7 @@ class App extends Component {
                     <h2 className="text-center mt-3">Posts</h2>
                     <nav>
                       {this.state.parentPosts.map((post, idx) =>
-                          <button onClick={() => this.relPost(post)} key={idx} className="d-block btn btn-link mx-auto">
+                          <button onClick={() => this.relPost(post)} key={idx} className={`d-block btn mx-auto ${this.state.post.endsWith(post) ? 'btn-light' : 'btn-link'}`}>
                             {fmtHeading(post)}
                           </button>
                       )}
@@ -195,23 +203,23 @@ class App extends Component {
             </section>
             {this.state.category !== '/' && (
                 <div className="col-xl-1 col-lg-1 col d-xl-block d-lg-block d-md-block d-sm-block mt-2 mt-xl-5 mt-lg-5 mt-md-2 mt-sm-2" style={{flexBasis: '50px'}}>
-                  <button className="btn mx-auto d-block" onClick={() => this.absCategory(this.state.parentCategory)}>
-                    <i className="fas fa-arrow-left px-2" style={{fontSize: '30px', color: 'darkgrey'}}/>
+                  <button className="btn mx-auto d-block" onClick={() => this.absCategory(this.state.parentCategory)} style={{fontSize: '50px', color: 'darkgrey'}}>
+                    🡄
                   </button>
                 </div>
             )}
             <section className="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-4 mb-xl-0 mb-lg-0 mb-sm-4 mb-md-4">
               <h2 className="text-center col">
                 {this.state.category === '/'
-                    ? 'Categories'
+                    ? 'Category'
                     : <div>{fmtHeading(basename(this.state.category))}<br/><hr/></div> }
               </h2>
               {this.state.categories.length > 0 && (
                   <nav>
-                    {this.state.categories.map((category, idx) =>
-                        <button onClick={() => this.relCategory(category)} key={idx}
-                                className="d-block btn btn-link mx-auto">
-                          {fmtHeading(category)}
+                    {this.state.categories.map((c, idx) =>
+                        <button onClick={() => this.relCategory(c)} key={idx}
+                                className='d-block btn mx-auto btn-link'>
+                          {fmtHeading(c)}
                         </button>
                     )}
                   </nav>
@@ -222,7 +230,7 @@ class App extends Component {
                     <h2 className="text-center mt-3">Posts</h2>
                     <nav>
                       {this.state.posts.map((post, idx) =>
-                          <button onClick={() => this.relPost(post)} key={idx} className="d-block btn btn-link mx-auto">
+                          <button onClick={() => this.relPost(post)} key={idx} className={`d-block btn mx-auto ${this.state.post.endsWith(post) ? 'btn-warning' : 'btn-link'}`}>
                             {fmtHeading(post)}
                           </button>
                       )}
@@ -247,8 +255,7 @@ class App extends Component {
           </main>
           <hr style={{maxWidth: '75vw'}}/>
           <footer className="text-center pb-4">
-            Copyright &copy; Norbert Logiewa {new Date(Date.now()).getFullYear()
-              .toString()}
+            Copyright &copy; Norbert Logiewa {this.year}
           </footer>
         </div>
     );
