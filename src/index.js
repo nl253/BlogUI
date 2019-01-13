@@ -13,139 +13,139 @@ import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import './index.scss';
 import * as serviceWorker from './serviceWorker';
+import {basename, dirname, isFile, join, splitDirsFiles} from './pathUtils';
+import {fmtHeading} from './fmtUtils';
+import {randStep} from './utils';
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      categories: [],
+      parentCategory: '',
+      parentCategories: [],
+      parentPosts: [],
       category: '',
       posts: [],
+      postCache: {},
+      categories: [],
+      categoryCache: {},
       post: '',
+      postTextCache: {},
       postText: '',
     };
-    this._fileEndRegex = /\.[^.]{2,7}\s*$/;
-    this._dirnameRegex = /(.*)\/[^/]+$/;
-    this._relativeRegex = /^\.\//;
-    this._basenameRegex = /\/([^/]*)$/;
-    this._headingDelimRegex = /[-_]/g;
-    this._redundantSlashRegex = /\/{2,}|\/\.\//;
-    this.dirname = this.dirname.bind(this);
-    this.basename = this.basename.bind(this);
-    this.isFile = this.isFile.bind(this);
-    this.isDir = this.isDir.bind(this);
-    this.join = this.join.bind(this);
     this.absCategory = this.absCategory.bind(this);
     this.absPost = this.absPost.bind(this);
     this.relCategory = this.relCategory.bind(this);
     this.relPost = this.relPost.bind(this);
-    if (window.location.pathname.match(this._fileEndRegex)) {
-      // noinspection JSIgnoredPromiseFromCall
-      this.absCategory(this.dirname(window.location.pathname));
-      // noinspection JSIgnoredPromiseFromCall
-      this.absPost(window.location.pathname);
+    if (window.location.pathname !== '' && isFile(window.location.pathname)) {
+      const filePath = window.location.pathname;
+      this.absCategory(dirname(window.location.pathname));
+      this.absPost(filePath);
     } else {
       // noinspection JSIgnoredPromiseFromCall
-      this.absCategory(window.location.pathname);
+      this.absCategory(window.location.pathname === '' ? '/' : window.location.pathname);
     }
   }
 
-  dirname(path) {
-    console.log(`running dirname on "${path}" ...`);
-    if (path === '/') return path;
-    else {
-      const match = this._dirnameRegex.exec(path);
-      return match[1];
-    }
-  }
-
-  basename(path) {
-    return path === '/' || path === '' ? '/' : this._basenameRegex.exec(path)[1];
-  }
-
-  isFile(path) {
-    return path.match(this._fileEndRegex);
-  }
-
-  isDir(path) {
-    return !this.isFile(path);
-  }
-
-  join(...pathParts) {
-    return pathParts.join('/')
-        .replace(this._relativeRegex, this.state.category + '/')
-        .replace(this._redundantSlashRegex, '/');
-  }
-
-  fmtHeading(heading) {
-    return heading.replace(this._headingDelimRegex, ' ')
-        .split(' ')
-        .map(word => word.length < 3 ? word : word[0].toUpperCase() + word.slice(1))
-        .join(' ').replace(this._fileEndRegex, '');
-  }
-
-  postLoadProgress(num) {
+  static postLoadProgress(num = 0) {
     const postArea = document.getElementById('post-text');
-    if (!postArea) return;
-    postArea.innerHTML = `
-      <progress max="100" value="${num}" class="mx-auto d-block w-50" style="margin-top: 10vw"/>
-    `;
-  }
-
-  randStep() {
-    return Math.round(Math.random() * 40);
+    if (postArea) {
+      postArea.innerHTML = `
+      <progress max="100" value="${num}" class="mx-auto d-block w-50" style="margin-top: 10vw"/>`;
+    }
   }
 
   async absPost(postPath) {
     if (postPath === this.state.post) return;
-    window.history.pushState({}, `post ${this.basename(postPath)}`, postPath);
-    const p1 = this.randStep();
-    this.postLoadProgress(p1);
-    const url = 'https://' + this.join('blog-nl-api.herokuapp.com/api/posts', postPath);
-    const postTextProm = fetch(url, {mode: 'cors'})
-          .then(res => res.json())
-          .then(json => json.data);
+    window.history.pushState({}, `post ${basename(postPath)}`, postPath);
+    if (this.state.postTextCache[postPath]) {
+      return this.setState((state, props) => ({
+        post: postPath,
+        postText: state.postTextCache[postPath],
+      }));
+    }
+
+    const postTextP = fetch('https://' + join('blog-nl-api.herokuapp.com/api/posts', postPath), {mode: 'cors'})
+        .then(res => res.json())
+        .then(json => json.data);
+
+    // "realistically" loading progress bar (purely visual)
+    const step1 = randStep(15, 60);
+    App.postLoadProgress(step1);
+    const minWait = 35;
     return setTimeout(() => {
-      const p2 = p1 + this.randStep();
-      this.postLoadProgress(p2);
+      App.postLoadProgress(step1 + randStep(15, 30));
       return setTimeout(() => {
-        this.postLoadProgress(100);
-        return setTimeout(async () => this.setState({
-          post: postPath,
-          postText: await postTextProm,
-        }), 35 + this.randStep());
-      }, 35 + this.randStep())
-    }, 35 + this.randStep());
+        App.postLoadProgress(100);
+        return setTimeout(async () => {
+          const postText = await postTextP;
+          this.state.postTextCache[postPath] = postText;
+          this.setState({post: postPath, postText});
+        }, randStep(minWait, 65));
+      }, randStep(minWait, 65))
+    }, randStep(minWait, 65));
   }
 
   async absCategory(categoryPath) {
-    if (categoryPath === this.state.category) {
-      return;
-    } else if (categoryPath === '') {
-      categoryPath = '/';
-    } else if (categoryPath.length > 0 && categoryPath.endsWith('/')) {
+    if (categoryPath === this.state.category) return;
+    else if (categoryPath === '') categoryPath = '/';
+    else if (categoryPath.length > 1 && categoryPath.endsWith('/')) {
       categoryPath = categoryPath.replace(/\/$/, '');
     }
-    window.history.pushState({}, `category ${this.basename(categoryPath)}`, categoryPath);
-    if (categoryPath === '') categoryPath = '/';
-    const url = 'https://' + this.join('blog-nl-api.herokuapp.com/api/posts', categoryPath);
-    console.warn(url);
-    const nodes = await fetch(url, {mode: 'cors'})
-        .then(res => res.json())
-        .then(json => json.nodes);
-    this.setState({
-      category: categoryPath,
-      categories: nodes.filter(this.isDir),
-      posts: nodes.filter(this.isFile),
-    });
+
+    window.history.pushState(undefined, `category ${basename(categoryPath)}`, categoryPath);
+
+    // try cache
+    if (this.state.categoryCache[categoryPath] !== undefined) {
+      this.setState((state, props) => ({
+        category: categoryPath,
+        categories: state.categoryCache[categoryPath],
+        posts: state.postCache[categoryPath],
+      }));
+    } else {
+      fetch(`https://${join('blog-nl-api.herokuapp.com/api/posts', categoryPath)}`, {mode: 'cors'})
+          .then(res => res.json())
+          .then(json => splitDirsFiles(json.nodes))
+          .then(({files, dirs}) => {
+            this.setState({category: categoryPath, categories: dirs, posts: files});
+            this.state.postCache[categoryPath] = files;
+            this.state.categoryCache[categoryPath] = dirs;
+          });
+    }
+
+    if (categoryPath === '/') {
+      return this.setState({
+        parentCategories: [],
+        parentPosts: [],
+        parentCategory: '',
+      });
+    }
+
+    const parentCategory = dirname(categoryPath);
+
+    // try cache
+    return this.state.categoryCache[parentCategory] === undefined
+        ? fetch(`https://${join('blog-nl-api.herokuapp.com/api/posts', parentCategory)}`, {mode: 'cors'})
+            .then(res => res.json())
+            .then(json => splitDirsFiles(json.nodes))
+            .then(({files, dirs}) => {
+              this.setState({parentCategory, parentCategories: dirs, parentPosts: files});
+              this.state.categoryCache[parentCategory] = dirs;
+              this.state.postCache[parentCategory] = files;
+            })
+        : this.setState((state, props) => ({
+          parentCategory,
+          parentCategories: state.categoryCache[parentCategory],
+          parentPosts: state.postCache[parentCategory],
+        }));
   }
 
   async relPost(post) {
-    return this.absPost(this.join('.', post));
+    return this.absPost(join(this.state.category, post));
   }
 
   async relCategory(category) {
-    return this.absCategory(this.join('.', category));
+    return this.absCategory(join(this.state.category, category));
   }
 
   render() {
@@ -157,25 +157,61 @@ class App extends Component {
               Blog
             </button>
           </header>
-          <main className="container-fluid column mt-5 row"
-                style={{minHeight: '75vh'}}>
-            <div className="col-2"/>
-            <section className="col-2">
-              {this.state.category !== '/' && this.state.category !== '' &&
-                <button className="d-block btn btn-light btn-sm mx-auto mb-4"
-                        onClick={() => this.absCategory(this.dirname(this.state.category))}
-                        style={{maxWidth: '100px'}}><i className="fas fa-arrow-left mr-2"/>Back</button>}
+          <main className="container-fluid mt-0 mt-xl-5 mt-lg-5 mt-md-0 mt-sm-0 d-flex no-gutters flex-column flex-xl-row flex-lg-row flex-md-column flex-sm-column" style={{minHeight: '75vh'}}>
+            <section className="col-xl-2 col-lg-2 d-none d-xl-block d-lg-block d-md-none d-sm-none">
+              {this.state.parentCategories.length > 0
+                  ? this.state.parentCategory.length > 1 ?
+                      (
+                          <div>
+                            <h2 className="text-center">{fmtHeading(basename(this.state.parentCategory))}</h2>
+                            <hr/>
+                          </div>
+                      )
+                      : <h2 className="text-center">Category</h2>
+                  : false
+              }
+              {this.state.parentCategories.length > 0 && (
+                  <nav>
+                    {this.state.parentCategories.map((c, idx) =>
+                        <button onClick={() => this.relCategory(join('..', c))} key={idx} className="d-block btn btn-link mx-auto">
+                          {fmtHeading(c)}
+                        </button>
+                    )}
+                  </nav>
+              )}
+              {this.state.parentCategories.length > 0 && this.state.parentPosts.length > 0 && <hr style={{maxWidth: '75%'}}/>}
+              {this.state.parentPosts.length > 0 && (
+                  <div>
+                    <h2 className="text-center mt-3">Posts</h2>
+                    <nav>
+                      {this.state.parentPosts.map((post, idx) =>
+                          <button onClick={() => this.relPost(post)} key={idx} className="d-block btn btn-link mx-auto">
+                            {fmtHeading(post)}
+                          </button>
+                      )}
+                    </nav>
+                  </div>
+              )}
+            </section>
+            {this.state.category !== '/' && (
+                <div className="col-xl-1 col-lg-1 col d-xl-block d-lg-block d-md-block d-sm-block mt-2 mt-xl-5 mt-lg-5 mt-md-2 mt-sm-2" style={{flexBasis: '50px'}}>
+                  <button className="btn mx-auto d-block" onClick={() => this.absCategory(this.state.parentCategory)}>
+                    <i className="fas fa-arrow-left px-2" style={{fontSize: '30px', color: 'darkgrey'}}/>
+                  </button>
+                </div>
+            )}
+            <section className="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-4 mb-xl-0 mb-lg-0 mb-sm-4 mb-md-4">
               <h2 className="text-center col">
-                {this.state.category === '/' || this.state.category === ''
+                {this.state.category === '/'
                     ? 'Categories'
-                    : <div>{this.fmtHeading(this.basename(this.state.category))}<br/><hr/></div> }
+                    : <div>{fmtHeading(basename(this.state.category))}<br/><hr/></div> }
               </h2>
               {this.state.categories.length > 0 && (
                   <nav>
                     {this.state.categories.map((category, idx) =>
                         <button onClick={() => this.relCategory(category)} key={idx}
                                 className="d-block btn btn-link mx-auto">
-                          {this.fmtHeading(category)}
+                          {fmtHeading(category)}
                         </button>
                     )}
                   </nav>
@@ -187,30 +223,27 @@ class App extends Component {
                     <nav>
                       {this.state.posts.map((post, idx) =>
                           <button onClick={() => this.relPost(post)} key={idx} className="d-block btn btn-link mx-auto">
-                            {this.fmtHeading(post)}
+                            {fmtHeading(post)}
                           </button>
                       )}
                     </nav>
                   </div>
               )}
             </section>
-            <section className="col-6">
-              {this.state.category !== '/' && this.state.category.split('/').filter(part => part.length > 0).length > 1 &&
-              <nav aria-label="breadcrumb" className="bg-white">
-                <ol className="breadcrumb bg-light">
-                  {
-                    (
-                        this.state.category.endsWith('/') && this.state.category.length > 0
-                            ? this.state.category.replace(/\/$/, '')
-                            : this.state.category
-                    ).split('/').map((part, idx) => <li key={idx} className="breadcrumb-item"><a className="h6">{part}</a></li>)
-                  }
-                </ol>
-              </nav>
-              }
+            <section className="col-xl col-lg col-md-12 col-sm-12">
               <div id="post-text" dangerouslySetInnerHTML={{__html: this.state.postText}}/>
             </section>
-            <div className="col-2"/>
+            {this.state.postText ?
+                (
+                    <section className="col-xl-1 col-lg-1 d-none d-xl-block d-lg-block d-md-none d-sm-none mx-xl-3 mx-lg-2">
+                      <h3>Info</h3>
+                      <p className="mb-1">{Math.ceil(this.state.postText.length / 650)} min read</p>
+                      <p className="mb-1">{this.state.postText.split(/( |\r\n|\n|\r|\t)+/).length} words</p>
+                      <p>{this.state.postText.match(/\.(\s+|\s*$)|\S{8,}[ \t]*(\n|\r\n|\r){2,}/gm).length} sentences</p>
+                    </section>
+                )
+                : <div className="col-xl-1 col-lg-1 d-none d-xl-block d-lg-block d-md-none d-sm-none"/>
+            }
           </main>
           <hr style={{maxWidth: '75vw'}}/>
           <footer className="text-center pb-4">
