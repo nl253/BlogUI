@@ -54,7 +54,7 @@
         <counts>
           <entry key="css" value="123" />
           <entry key="html" value="246" />
-          <entry key="js" value="95474" />
+          <entry key="js" value="95572" />
           <entry key="json" value="277" />
           <entry key="md" value="3" />
           <entry key="scss" value="902" />
@@ -66,7 +66,7 @@
           <entry key="CSS" value="123" />
           <entry key="HTML" value="248" />
           <entry key="JSON" value="277" />
-          <entry key="JavaScript" value="95472" />
+          <entry key="JavaScript" value="95570" />
           <entry key="Markdown" value="3" />
           <entry key="SCSS" value="902" />
           <entry key="TypeScript" value="3" />
@@ -84,8 +84,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/index.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="600">
-              <caret line="153" column="66" selection-start-line="153" selection-start-column="66" selection-end-line="153" selection-end-column="66" />
+            <state relative-caret-position="820">
+              <caret line="257" column="44" selection-start-line="257" selection-start-column="44" selection-end-line="257" selection-end-column="44" />
               <folding>
                 <element signature="e#241#280#0" expanded="true" />
               </folding>
@@ -301,12 +301,12 @@
       <workItem from="1547287375119" duration="9884000" />
       <workItem from="1547324012463" duration="8736000" />
       <workItem from="1547371467114" duration="2138000" />
-      <workItem from="1547387061992" duration="13662000" />
+      <workItem from="1547387061992" duration="14342000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="69601000" />
+    <option name="totallyTimeSpent" value="70281000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="0" width="1293" height="1407" extended-state="0" />
@@ -631,8 +631,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/index.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="600">
-          <caret line="153" column="66" selection-start-line="153" selection-start-column="66" selection-end-line="153" selection-end-column="66" />
+        <state relative-caret-position="820">
+          <caret line="257" column="44" selection-start-line="257" selection-start-column="44" selection-end-line="257" selection-end-column="44" />
           <folding>
             <element signature="e#241#280#0" expanded="true" />
           </folding>
