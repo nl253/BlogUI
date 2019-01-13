@@ -151,8 +151,7 @@ class App extends Component {
   render() {
     return (
         <div>
-          <header className="container-fluid bg-light border-bottom"
-                  style={{padding: '0 19vw'}}>
+          <header className="bg-light border-bottom py-xl-2 py-lg-2 py-md-1 py-sm-1">
             <button onMouseOver={() => {
               const el = document.querySelector('header > button');
               // el.classList.add('text-warning');
@@ -161,11 +160,11 @@ class App extends Component {
               const el = document.querySelector('header > button');
               // el.classList.remove('text-warning');
               el.style.textShadow = 'inherit';
-            }} onClick={() => this.absCategory('/')} className="d-block mx-auto h1 btn btn-lg" style={{fontSize: '3rem'}}>
+            }} onClick={() => this.absCategory('/')} className="d-block mx-auto my-0 p-0 h1 btn" style={{fontSize: '2.6rem'}}>
               Blog
             </button>
           </header>
-          <main className="container-fluid mt-0 mt-xl-5 mt-lg-5 mt-md-0 mt-sm-0 d-flex no-gutters flex-column flex-xl-row flex-lg-row flex-md-column flex-sm-column" style={{minHeight: '75vh'}}>
+          <main className="container-fluid mt-0 mt-xl-5 mt-lg-5 mt-md-0 mt-sm-0 d-flex no-gutters flex-column flex-xl-row flex-lg-row flex-md-row flex-sm-column" style={{minHeight: '75vh'}}>
             <section className="col-xl-2 col-lg-2 d-none d-xl-block d-lg-block d-md-none d-sm-none">
               {this.state.parentCategories.length > 0
                   ? this.state.parentCategory.length > 1 ?
@@ -181,7 +180,7 @@ class App extends Component {
               {this.state.parentCategories.length > 0 && (
                   <nav>
                     {this.state.parentCategories.map((c, idx) =>
-                        <button onClick={() => this.relCategory(join('..', c))} key={idx} className={`d-block btn mx-auto ${this.state.category.endsWith(c) ? 'btn-warning' : 'btn-link'}`}>
+                        <button onClick={() => this.relCategory(join('..', c))} key={idx} className={`d-block btn mx-auto w-75 ${this.state.category.endsWith(c) ? 'btn-warning' : 'btn-link'}`}>
                           {fmtHeading(c)}
                         </button>
                     )}
@@ -193,7 +192,7 @@ class App extends Component {
                     <h2 className="text-center mt-3">Posts</h2>
                     <nav>
                       {this.state.parentPosts.map((post, idx) =>
-                          <button onClick={() => this.relPost(post)} key={idx} className={`d-block btn mx-auto ${this.state.post.endsWith(post) ? 'btn-light' : 'btn-link'}`}>
+                          <button onClick={() => this.relPost(post)} key={idx} className={`d-block btn mx-auto w-75 ${this.state.post.endsWith(post) ? 'btn-light' : 'btn-link'}`}>
                             {fmtHeading(post)}
                           </button>
                       )}
@@ -201,24 +200,23 @@ class App extends Component {
                   </div>
               )}
             </section>
-            {this.state.category !== '/' && (
-                <div className="col-xl-1 col-lg-1 col d-xl-block d-lg-block d-md-block d-sm-block mt-2 mt-xl-5 mt-lg-5 mt-md-2 mt-sm-2" style={{flexBasis: '50px'}}>
-                  <button className="btn mx-auto d-block" onClick={() => this.absCategory(this.state.parentCategory)} style={{fontSize: '50px', color: 'darkgrey'}}>
-                    🡄
-                  </button>
-                </div>
-            )}
-            <section className="col-xl-2 col-lg-2 col-md-12 col-sm-12 mb-4 mb-xl-0 mb-lg-0 mb-sm-4 mb-md-4">
+            <section className="col-xl-2 col-lg-2 col-md-3 col-sm-12 my-4 my-xl-0 my-lg-0 my-md-4 my-sm-4">
               <h2 className="text-center col">
                 {this.state.category === '/'
                     ? 'Category'
-                    : <div>{fmtHeading(basename(this.state.category))}<br/><hr/></div> }
+                    : fmtHeading(basename(this.state.category))
+                }
               </h2>
+              {this.state.category !== '/' && (
+                  <button className="btn btn-light d-block w-50 mx-auto" onClick={() => this.absCategory(this.state.parentCategory)}>
+                    Back
+                  </button>
+              )}
               {this.state.categories.length > 0 && (
                   <nav>
                     {this.state.categories.map((c, idx) =>
                         <button onClick={() => this.relCategory(c)} key={idx}
-                                className='d-block btn mx-auto btn-link'>
+                                className='d-block btn mx-auto w-75 btn-link'>
                           {fmtHeading(c)}
                         </button>
                     )}
@@ -230,7 +228,7 @@ class App extends Component {
                     <h2 className="text-center mt-3">Posts</h2>
                     <nav>
                       {this.state.posts.map((post, idx) =>
-                          <button onClick={() => this.relPost(post)} key={idx} className={`d-block btn mx-auto ${this.state.post.endsWith(post) ? 'btn-warning' : 'btn-link'}`}>
+                          <button onClick={() => this.relPost(post)} key={idx} className={`d-block btn w-75 mx-auto ${this.state.post.endsWith(post) ? 'btn-warning' : 'btn-link'}`}>
                             {fmtHeading(post)}
                           </button>
                       )}
@@ -238,8 +236,8 @@ class App extends Component {
                   </div>
               )}
             </section>
-            <section className="col-xl col-lg col-md-12 col-sm-12">
-              <div id="post-text" dangerouslySetInnerHTML={{__html: this.state.postText}}/>
+            <section className="col-xl col-lg col-md-9 col-sm-12">
+              <div id="post-text" dangerouslySetInnerHTML={{__html: this.state.postText}} className="my-4 my-xl-0 my-lg-0 my-md-4 my-sm-4"/>
             </section>
             {this.state.postText ?
                 (
@@ -253,7 +251,7 @@ class App extends Component {
                 : <div className="col-xl-1 col-lg-1 d-none d-xl-block d-lg-block d-md-none d-sm-none"/>
             }
           </main>
-          <footer className="py-4 bg-light d-none d-xl-block d-lg-block d-md-none d-sm-none border-top">
+          <footer className="py-4 bg-light d-none d-xl-block d-lg-block d-md-none d-sm-none border-top mt-xl-3 mt-1 mt-lg-3 mt-md-1 mt-sm-1">
             <div className="row mx-auto mt-2 mb-4" style={{maxWidth: '360px'}}>
               <div className="col"><a href="https://www.linkedin.com/in/norbert-logiewa" className="btn btn-sm btn-secondary">LinkedIn</a></div>
               <div className="col"><a href="https://github.com/nl253" className="btn btn-sm btn-secondary">GitHub</a></div>

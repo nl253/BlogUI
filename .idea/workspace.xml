@@ -28,7 +28,7 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="css" value="1" />
+          <entry key="css" value="3" />
           <entry key="html" value="2" />
           <entry key="ico" value="1" />
           <entry key="js" value="18" />
@@ -40,7 +40,7 @@
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="CSS" value="1" />
+          <entry key="CSS" value="3" />
           <entry key="HTML" value="2" />
           <entry key="Image" value="1" />
           <entry key="JSON" value="5" />
@@ -54,7 +54,7 @@
         <counts>
           <entry key="css" value="123" />
           <entry key="html" value="246" />
-          <entry key="js" value="95572" />
+          <entry key="js" value="97352" />
           <entry key="json" value="277" />
           <entry key="md" value="3" />
           <entry key="scss" value="902" />
@@ -66,7 +66,7 @@
           <entry key="CSS" value="123" />
           <entry key="HTML" value="248" />
           <entry key="JSON" value="277" />
-          <entry key="JavaScript" value="95570" />
+          <entry key="JavaScript" value="97350" />
           <entry key="Markdown" value="3" />
           <entry key="SCSS" value="902" />
           <entry key="TypeScript" value="3" />
@@ -84,10 +84,44 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/index.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="820">
-              <caret line="257" column="44" selection-start-line="257" selection-start-column="44" selection-end-line="257" selection-end-column="44" />
+            <state relative-caret-position="640">
+              <caret line="202" column="50" selection-start-line="202" selection-start-column="50" selection-end-line="202" selection-end-column="50" />
               <folding>
                 <element signature="e#241#280#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/node_modules/bootstrap/dist/css/bootstrap.css">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-124796">
+              <caret line="327" column="30" selection-start-line="327" selection-start-column="30" selection-end-line="327" selection-end-column="30" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/node_modules/bootstrap/dist/css/bootstrap.min.css">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-9176">
+              <caret line="5" column="4980" selection-start-line="5" selection-start-column="4980" selection-end-line="5" selection-end-column="4980" />
+              <folding>
+                <element signature="e#25977#26211#2" expanded="true" />
+                <element signature="e#26816#26969#1" expanded="true" />
+                <element signature="e#27009#27243#1" expanded="true" />
+                <element signature="e#30336#30612#2" expanded="true" />
+                <element signature="e#31245#31398#1" expanded="true" />
+                <element signature="e#31438#31714#1" expanded="true" />
+                <element signature="e#61310#61497#2" expanded="true" />
+                <element signature="e#61726#61862#2" expanded="true" />
+                <element signature="e#62265#62398#2" expanded="true" />
+                <element signature="e#63869#64022#1" expanded="true" />
+                <element signature="e#76076#76306#2" expanded="true" />
+                <element signature="e#77173#77409#2" expanded="true" />
+                <element signature="e#104435#104612#2" expanded="true" />
+                <element signature="e#104658#104835#2" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -185,7 +219,7 @@
       <path value="$PROJECT_DIR$/package.json" />
     </packageJsonPaths>
   </component>
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-11" />
     <option name="width" value="1940" />
     <option name="height" value="2111" />
@@ -301,24 +335,24 @@
       <workItem from="1547287375119" duration="9884000" />
       <workItem from="1547324012463" duration="8736000" />
       <workItem from="1547371467114" duration="2138000" />
-      <workItem from="1547387061992" duration="14342000" />
+      <workItem from="1547387061992" duration="16266000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="70281000" />
+    <option name="totallyTimeSpent" value="72205000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="0" width="1293" height="1407" extended-state="0" />
+    <frame x="-7" y="-7" width="2575" height="1415" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49891067" visible="true" weight="0.17904612" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49891067" visible="true" weight="0.089418195" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="npm" order="2" sideWeight="0.50108933" side_tool="true" weight="0.17904612" />
       <window_info id="Favorites" order="3" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49980476" weight="0.329653" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.42131978" weight="0.19637224" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.42131978" visible="true" weight="0.19592476" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -629,10 +663,40 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/node_modules/bootstrap/dist/css/bootstrap.min.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-9176">
+          <caret line="5" column="4980" selection-start-line="5" selection-start-column="4980" selection-end-line="5" selection-end-column="4980" />
+          <folding>
+            <element signature="e#25977#26211#2" expanded="true" />
+            <element signature="e#26816#26969#1" expanded="true" />
+            <element signature="e#27009#27243#1" expanded="true" />
+            <element signature="e#30336#30612#2" expanded="true" />
+            <element signature="e#31245#31398#1" expanded="true" />
+            <element signature="e#31438#31714#1" expanded="true" />
+            <element signature="e#61310#61497#2" expanded="true" />
+            <element signature="e#61726#61862#2" expanded="true" />
+            <element signature="e#62265#62398#2" expanded="true" />
+            <element signature="e#63869#64022#1" expanded="true" />
+            <element signature="e#76076#76306#2" expanded="true" />
+            <element signature="e#77173#77409#2" expanded="true" />
+            <element signature="e#104435#104612#2" expanded="true" />
+            <element signature="e#104658#104835#2" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/node_modules/bootstrap/dist/css/bootstrap.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-124796">
+          <caret line="327" column="30" selection-start-line="327" selection-start-column="30" selection-end-line="327" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/index.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="820">
-          <caret line="257" column="44" selection-start-line="257" selection-start-column="44" selection-end-line="257" selection-end-column="44" />
+        <state relative-caret-position="640">
+          <caret line="202" column="50" selection-start-line="202" selection-start-column="50" selection-end-line="202" selection-end-column="50" />
           <folding>
             <element signature="e#241#280#0" expanded="true" />
           </folding>
