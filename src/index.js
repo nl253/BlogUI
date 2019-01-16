@@ -151,35 +151,41 @@ class App extends Component {
   render() {
     return (
         <div>
-          <header className="bg-light border-bottom py-xl-2 py-lg-2 py-md-1 py-sm-1">
-            <button onMouseOver={() => {
-              const el = document.querySelector('header > button');
-              // el.classList.add('text-warning');
-              el.style.textShadow = '0 0 8px darkgrey';
-            }} onMouseOut={() => {
-              const el = document.querySelector('header > button');
-              // el.classList.remove('text-warning');
-              el.style.textShadow = 'inherit';
-            }} onClick={() => this.absCategory('/')} className="d-block mx-auto my-0 p-0 h1 btn" style={{fontSize: '2.6rem'}}>
-              Blog
-            </button>
-          </header>
-          <main className="container-fluid mt-0 mt-xl-5 mt-lg-5 mt-md-0 mt-sm-0 d-flex no-gutters flex-column flex-xl-row flex-lg-row flex-md-row flex-sm-column" style={{minHeight: '75vh'}}>
+          {/*<header className="py-xl-2 py-lg-2 py-md-1 py-sm-1">*/}
+            {/*<button onMouseOver={() => {*/}
+              {/*const el = document.querySelector('header > button');*/}
+              {/*// el.classList.add('text-warning');*/}
+              {/*el.style.textShadow = '0 0 8px darkgrey';*/}
+            {/*}} onMouseOut={() => {*/}
+              {/*const el = document.querySelector('header > button');*/}
+              {/*// el.classList.remove('text-warning');*/}
+              {/*el.style.textShadow = 'inherit';*/}
+            {/*}} onClick={() => this.absCategory('/')} className="d-block my-0 p-0 h1 btn text-uppercase" style={{fontSize: '2.6rem'}}>*/}
+              {/*Blog*/}
+            {/*</button>*/}
+          {/*</header>*/}
+          <main className="container-fluid mt-0 mt-xl-5 mt-lg-5 mt-md-0 mt-sm-0 d-flex no-gutters flex-column flex-xl-row flex-lg-row flex-md-row flex-sm-column" style={{minHeight: '84vh'}}>
             <section className="col-xl-2 col-lg-2 d-none d-xl-block d-lg-block d-md-none d-sm-none">
               {this.state.parentCategories.length > 0
                   ? this.state.parentCategory.length > 1 ?
                       (
                           <div>
-                            <h2 className="text-center">{fmtHeading(basename(this.state.parentCategory))}</h2>
+                            <h2 className="text-center mx-auto">{fmtHeading(basename(this.state.parentCategory))}</h2>
                             <hr/>
                           </div>
                       )
-                      : <h2 className="text-center">Category</h2>
+                      :
+                      (
+                          <div>
+                            <h1 className="text-center mx-auto display-4">Blog</h1>
+                            <hr style={{maxWidth: '75%'}}/>
+                          </div>
+                      )
                   : false
               }
               {this.state.parentCategories.length > 0 && (
                   <nav>
-                    {this.state.parentCategories.map((c, idx) =>
+                    {this.state.parentCategories.sort().map((c, idx) =>
                         <button onClick={() => this.relCategory(join('..', c))} key={idx} className={`d-block btn mx-auto w-75 ${this.state.category.endsWith(c) ? 'btn-warning' : 'btn-link'}`}>
                           {fmtHeading(c)}
                         </button>
@@ -189,9 +195,9 @@ class App extends Component {
               {this.state.parentCategories.length > 0 && this.state.parentPosts.length > 0 && <hr style={{maxWidth: '75%'}}/>}
               {this.state.parentPosts.length > 0 && (
                   <div>
-                    <h2 className="text-center mt-3">Posts</h2>
+                    <h3 className="text-center mt-3 mx-auto">Posts</h3>
                     <nav>
-                      {this.state.parentPosts.map((post, idx) =>
+                      {this.state.parentPosts.sort().map((post, idx) =>
                           <button onClick={() => this.relPost(post)} key={idx} className={`d-block btn mx-auto w-75 ${this.state.post.endsWith(post) ? 'btn-light' : 'btn-link'}`}>
                             {fmtHeading(post)}
                           </button>
@@ -201,20 +207,26 @@ class App extends Component {
               )}
             </section>
             <section className="col-xl-2 col-lg-2 col-md-3 col-sm-12 my-4 my-xl-0 my-lg-0 my-md-4 my-sm-4">
-              <h2 className="text-center col">
+              <div className="text-center col mx-auto">
                 {this.state.category === '/'
-                    ? 'Category'
-                    : fmtHeading(basename(this.state.category))
+                    ?
+                    (
+                        <div>
+                          <h1 className="text-center mx-auto display-4">Blog</h1>
+                          <hr style={{maxWidth: '75%'}}/>
+                        </div>
+                    )
+                    : <h2>{fmtHeading(basename(this.state.category))}</h2>
                 }
-              </h2>
+              </div>
               {this.state.category !== '/' && (
-                  <button className="btn btn-light d-block w-50 mx-auto" onClick={() => this.absCategory(this.state.parentCategory)}>
+                  <button className="btn btn-light d-block w-50 mx-auto border" onClick={() => this.absCategory(this.state.parentCategory)}>
                     Back
                   </button>
               )}
               {this.state.categories.length > 0 && (
                   <nav>
-                    {this.state.categories.map((c, idx) =>
+                    {this.state.categories.sort().map((c, idx) =>
                         <button onClick={() => this.relCategory(c)} key={idx}
                                 className='d-block btn mx-auto w-75 btn-link'>
                           {fmtHeading(c)}
@@ -225,9 +237,9 @@ class App extends Component {
               {this.state.categories > 0 && this.state.posts.length > 0 && <hr style={{maxWidth: '75%'}}/>}
               {this.state.posts.length > 0 && (
                   <div>
-                    <h2 className="text-center mt-3">Posts</h2>
+                    <h3 className="text-center mt-3 mx-auto">Posts</h3>
                     <nav>
-                      {this.state.posts.map((post, idx) =>
+                      {this.state.posts.sort().map((post, idx) =>
                           <button onClick={() => this.relPost(post)} key={idx} className={`d-block btn w-75 mx-auto ${this.state.post.endsWith(post) ? 'btn-warning' : 'btn-link'}`}>
                             {fmtHeading(post)}
                           </button>
@@ -236,29 +248,31 @@ class App extends Component {
                   </div>
               )}
             </section>
-            <section className="col-xl col-lg col-md-9 col-sm-12">
-              <div id="post-text" dangerouslySetInnerHTML={{__html: this.state.postText}} className="my-4 my-xl-0 my-lg-0 my-md-4 my-sm-4"/>
-            </section>
-            {this.state.postText ?
-                (
-                    <section className="col-xl-1 col-lg-1 d-none d-xl-block d-lg-block d-md-none d-sm-none mx-xl-3 mx-lg-2">
-                      <h3>Info</h3>
-                      <p className="mb-1">{Math.ceil(this.state.postText.length / 650)} min read</p>
-                      <p className="mb-1">{this.state.postText.split(/( |\r\n|\n|\r|\t)+/).length} words</p>
-                      <p>{this.state.postText.match(/\.(\s+|\s*$)|\S{8,}[ \t]*(\n|\r\n|\r){2,}/gm).length} sentences</p>
-                    </section>
-                )
-                : <div className="col-xl-1 col-lg-1 d-none d-xl-block d-lg-block d-md-none d-sm-none"/>
-            }
+            {this.state.postText && (
+                <section className="col-xl col-lg col-md-9 col-sm-12 container-fluid row justify-content-around">
+                  <div className={`col-xl-3 col-lg-3 d-md-none d-sm-none`}/>
+                  <section className={`col-xl-6 col-8-lg col-12-md col-12-sm`}>
+                    <div id="post-text" dangerouslySetInnerHTML={{__html: this.state.postText}} className="my-4 my-xl-0 my-lg-0 my-md-4 my-sm-4"/>
+                  </section>
+                  <div className={`col-xl-1 col-lg-1 d-md-none d-sm-none`}/>
+                  <section className={`col-xl-1 col-lg-1 d-none d-xl-block d-lg-block d-md-none d-sm-none`}>
+                    <h3>Info</h3>
+                    <p className="mb-1">{Math.ceil(this.state.postText.length / 650)} min read</p>
+                    <p className="mb-1">{this.state.postText.split(/( |\r\n|\n|\r|\t)+/).length} words</p>
+                    <p>{this.state.postText.match(/\.(\s+|\s*$)|\S{8,}[ \t]*(\n|\r\n|\r){2,}/gm).length} sentences</p>
+                  </section>
+                  <div className={`col-xl-1 col-lg-1 d-md-none d-sm-none`}/>
+                </section>
+            )}
           </main>
-          <footer className="py-4 bg-light d-none d-xl-block d-lg-block d-md-none d-sm-none border-top mt-xl-3 mt-1 mt-lg-3 mt-md-1 mt-sm-1">
+          <footer className="py-4 bg-light d-none d-xl-block d-lg-block d-md-block d-sm-block border-top mt-xl-3 mt-1 mt-lg-3 mt-md-1 mt-sm-1">
             <div className="row mx-auto mt-2 mb-4" style={{maxWidth: '360px'}}>
               <div className="col"><a href="https://www.linkedin.com/in/norbert-logiewa" className="btn btn-sm btn-secondary">LinkedIn</a></div>
               <div className="col"><a href="https://github.com/nl253" className="btn btn-sm btn-secondary">GitHub</a></div>
               <div className="col"><a href="https://docs.google.com/document/d/1I94ZHc_75a2ivyjcDXjESIrGYPmJUriTm3xmEkcwaeI/edit?usp=sharing" className="btn btn-sm btn-secondary">CV</a></div>
               <div className="col"><a href="https://portfolio-nl.herokuapp.com" className="btn btn-sm btn-secondary">Portfolio</a></div>
             </div>
-            <p className="text-center">Copyright &copy; Norbert Logiewa {this.year}</p>
+            <p className="text-center mx-auto">Copyright &copy; Norbert Logiewa {this.year}</p>
           </footer>
         </div>
     );
