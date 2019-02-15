@@ -1,14 +1,3 @@
-/**
- * Case 1: Relative change of category.
- *  - press on a link
- * Case 2: Absolute change of category.
- *  - load a page
- * Case 3: Relative change of post.
- *  - press on a link
- * Case 4: Absolute change of post.
- *  - load a page
- */
-
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import './index.scss';
@@ -151,26 +140,15 @@ class App extends Component {
   render() {
     return (
         <div>
-          {/*<header className="py-xl-2 py-lg-2 py-md-1 py-sm-1">*/}
-            {/*<button onMouseOver={() => {*/}
-              {/*const el = document.querySelector('header > button');*/}
-              {/*// el.classList.add('text-warning');*/}
-              {/*el.style.textShadow = '0 0 8px darkgrey';*/}
-            {/*}} onMouseOut={() => {*/}
-              {/*const el = document.querySelector('header > button');*/}
-              {/*// el.classList.remove('text-warning');*/}
-              {/*el.style.textShadow = 'inherit';*/}
-            {/*}} onClick={() => this.absCategory('/')} className="d-block my-0 p-0 h1 btn text-uppercase" style={{fontSize: '2.6rem'}}>*/}
-              {/*Blog*/}
-            {/*</button>*/}
-          {/*</header>*/}
           <main className="container-fluid mt-0 mt-xl-5 mt-lg-5 mt-md-0 mt-sm-0 d-flex no-gutters flex-column flex-xl-row flex-lg-row flex-md-row flex-sm-column" style={{minHeight: '84vh'}}>
             <section className="col-xl-2 col-lg-2 d-none d-xl-block d-lg-block d-md-none d-sm-none">
               {this.state.parentCategories.length > 0
                   ? this.state.parentCategory.length > 1 ?
                       (
                           <div>
-                            <h2 className="text-center mx-auto">{fmtHeading(basename(this.state.parentCategory))}</h2>
+                            <h2 className="text-center mx-auto">
+                              {fmtHeading(basename(this.state.parentCategory))}
+                            </h2>
                             <hr/>
                           </div>
                       )
@@ -266,11 +244,35 @@ class App extends Component {
             )}
           </main>
           <footer className="py-4 bg-light d-none d-xl-block d-lg-block d-md-block d-sm-block border-top mt-xl-3 mt-1 mt-lg-3 mt-md-1 mt-sm-1">
-            <div className="row mx-auto mt-2 mb-4" style={{maxWidth: '360px'}}>
-              <div className="col"><a href="https://www.linkedin.com/in/norbert-logiewa" className="btn btn-sm btn-secondary">LinkedIn</a></div>
-              <div className="col"><a href="https://github.com/nl253" className="btn btn-sm btn-secondary">GitHub</a></div>
-              <div className="col"><a href="https://docs.google.com/document/d/1I94ZHc_75a2ivyjcDXjESIrGYPmJUriTm3xmEkcwaeI/edit?usp=sharing" className="btn btn-sm btn-secondary">CV</a></div>
-              <div className="col"><a href="https://portfolio-nl.herokuapp.com" className="btn btn-sm btn-secondary">Portfolio</a></div>
+            <div className="mx-auto mt-2 mb-4" style={{maxWidth: '370px'}}>
+              <span className="mr-3">
+                <a href="https://www.linkedin.com/in/norbert-logiewa"
+                   className="btn btn-sm btn-secondary"
+                   style={{minWidth: '80px'}}>
+                  LinkedIn
+                </a>
+              </span>
+              <span className="mr-3">
+                <a href="https://github.com/nl253"
+                   className="btn btn-sm btn-secondary"
+                   style={{minWidth: '80px'}}>
+                  GitHub
+                </a>
+              </span>
+              <span className="mr-3">
+                <a href="https://docs.google.com/document/d/1I94ZHc_75a2ivyjcDXjESIrGYPmJUriTm3xmEkcwaeI/edit?usp=sharing"
+                   className="btn btn-sm btn-secondary"
+                   style={{minWidth: '80px'}}>
+                  CV
+                </a>
+              </span>
+              <span>
+                <a href="https://portfolio-nl.herokuapp.com"
+                   className="btn btn-sm btn-secondary"
+                   style={{minWidth: '80px'}}>
+                  Portfolio
+                </a>
+              </span>
             </div>
             <p className="text-center mx-auto">Copyright &copy; Norbert Logiewa {this.year}</p>
           </footer>

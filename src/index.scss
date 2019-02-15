@@ -5,7 +5,6 @@ $font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
 $font-family-monospace:  "Fira Code", Hack, source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 $font-family-serif:      Alegreya, Merriweather, Quattrocento, "Times New Roman", serif;
 $font-family-base:       $font-family-serif;
-//$font-size-base:         14px;
 
 $headings-font-family: $font-family-sans-serif;
 $headings-color:       #505050;
@@ -59,14 +58,7 @@ $headings-margin-bottom:    0.5em;
 
 body {
   font-size: 17.5px !important;
-  //-webkit-font-smoothing: antialiased;
-  //-moz-osx-font-smoothing: grayscale;
 }
-
-//p, li, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .display-1, .display-2, .display-3, .display-4 {
-//  //max-width: ;
-//  max-width: 70%;
-//}
 
 li {
   max-width: 70% !important;
