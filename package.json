@@ -26,8 +26,5 @@
     ">0.2%",
     "not dead",
     "not ie < 11"
-  ],
-  "devDependencies": {
-    "eslint": "^5.14.0"
-  }
+  ]
 }
