@@ -1,15 +1,42 @@
-const _fileEndRegex = /\.[^.]{2,7}\s*$/;
-const _headingDelimRegex = /[-_]/g;
+const REGEX_WORDS = /( |\r\n|\n|\r|\t)+/;
+const REGEX_SENT = /\.(\s+|\s*$)|\S{8,}[ \t]*(\n|\r\n|\r){2,}/gm;
+const REGEX_FILE_END = /\.[^.]{2,7}\s*$/;
+const REGEX_HEADING_DELIM = /[-_]/g;
 
-function randStep(min = 0, max = 40) {
-  return min + Math.round(Math.random() * (max - min));
-}
+/**
+ * @param {number} min
+ * @param {number} max
+ * @returns {number}
+ */
+const randStep = (min = 0, max = 40) => min + Math.round(Math.random() * (max - min));
 
-function fmtHeading(heading) {
-  return heading.replace(_headingDelimRegex, ' ')
-      .split(' ')
-      .map(word => word.length < 3 ? word : word[0].toUpperCase() + word.slice(1))
-      .join(' ').replace(_fileEndRegex, '');
-}
+/**
+ * @param {string} heading
+ * @returns {string}
+ */
+const fmtHeading = heading => heading
+  .replace(REGEX_HEADING_DELIM, ' ')
+  .split(' ')
+  .map(word => word.length < 3 ? word : word[0].toUpperCase() + word.slice(1))
+  .join(' ').replace(REGEX_FILE_END, '');
 
-export {fmtHeading, randStep};
+
+/**
+ * @param {string} txt
+ * @return {number}
+ */
+const countSent = txt => txt.match(REGEX_SENT).length;
+
+/**
+ * @param {string} txt
+ * @return {number}
+ */
+const countWords = txt => txt.split(REGEX_WORDS).length;
+
+/**
+ * @param {string} txt
+ * @return {number}
+ */
+const getTimeToReadInMin = txt => Math.ceil(txt.length / 650);
+
+export { fmtHeading, randStep, countSent, countWords, getTimeToReadInMin };
