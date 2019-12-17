@@ -2,6 +2,9 @@
   <dictionary name="norbe">
     <words>
       <w>delim</w>
+      <w>ignorecase</w>
+      <w>isdir</w>
+      <w>isfile</w>
     </words>
   </dictionary>
 </component>

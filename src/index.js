@@ -11,6 +11,8 @@ import {
   getTimeToReadInMin,
 } from './utils';
 
+const BASE_URL = 'https://blog-api-nl.herokuapp.com/posts';
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -66,7 +68,7 @@ class App extends Component {
     }
 
     const job = (async () => {
-      const res = await fetch(`https://${join('blog-nl-api.herokuapp.com/api/posts', postPath)}`, {mode: 'cors'});
+      const res = await fetch(join(BASE_URL, postPath), {mode: 'cors'});
       const json = await res.json();
       return json.data;
     })();
@@ -110,7 +112,7 @@ class App extends Component {
         posts: state.postCache[categoryPath],
       }));
     } else {
-      const res = await fetch(`https://${join('blog-nl-api.herokuapp.com/api/posts', categoryPath)}`, {mode: 'cors'});
+      const res = await fetch(join(BASE_URL, categoryPath), {mode: 'cors'});
       const json = await res.json();
       const { files, dirs } = splitDirsFiles(json.nodes);
       this.setState({category: categoryPath, categories: dirs, posts: files});
@@ -130,7 +132,7 @@ class App extends Component {
     const parentCategory = dirname(categoryPath);
 
     if (this.state.categoryCache[parentCategory] === undefined) {
-      const res = await fetch(`https://${join('blog-nl-api.herokuapp.com/api/posts', parentCategory)}`, {mode: 'cors'});
+      const res = await fetch(join(BASE_URL, parentCategory), {mode: 'cors'});
       const json = await res.json();
       const {files, dirs} = splitDirsFiles(json.nodes);
       this.setState({parentCategory, parentCategories: dirs, parentPosts: files});
