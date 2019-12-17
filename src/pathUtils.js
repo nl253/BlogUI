@@ -7,12 +7,6 @@ const REGEX_FILE_END = /\.[^.]{2,7}\s*$/;
 const isFile = path => !!path.match(REGEX_FILE_END);
 
 /**
- * @param {string} path
- * @returns {boolean}
- */
-const isDir = path => !isFile(path);
-
-/**
  * @param {string[]} nodeList
  * @returns {{dirs: [], files: []}}
  */
@@ -26,7 +20,6 @@ const splitDirsFiles = nodeList => {
 };
 
 export {
-  isDir,
   isFile,
   splitDirsFiles,
 };
