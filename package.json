@@ -47,5 +47,8 @@
     ">0.2%",
     "not dead",
     "not ie < 11"
-  ]
+  ],
+  "devDependencies": {
+    "path-browserify": "^1.0.0"
+  }
 }
