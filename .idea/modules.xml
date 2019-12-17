@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../BlogAPI/.idea/Blog.iml" filepath="$PROJECT_DIR$/../BlogAPI/.idea/Blog.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../BlogAPI2/.idea/BlogAPI2.iml" filepath="$PROJECT_DIR$/../BlogAPI2/.idea/BlogAPI2.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/blog_ui.iml" filepath="$PROJECT_DIR$/.idea/blog_ui.iml" />
     </modules>
   </component>

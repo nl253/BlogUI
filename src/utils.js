@@ -25,13 +25,13 @@ const fmtHeading = heading => heading
  * @param {string} txt
  * @return {number}
  */
-const countSent = txt => txt.match(REGEX_SENT).length;
+const countSent = txt => (txt.match(REGEX_SENT) || []).length;
 
 /**
  * @param {string} txt
  * @return {number}
  */
-const countWords = txt => txt.split(REGEX_WORDS).length;
+const countWords = txt => (txt.split(REGEX_WORDS) || []).length;
 
 /**
  * @param {string} txt
