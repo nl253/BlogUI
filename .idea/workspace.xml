@@ -3,15 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="5b5cdcc3-bc97-4774-aea0-89396f5fb060" name="Default Changelist" comment="">
       <change afterPath="$PROJECT_DIR$/../BlogAPI/.idea/BlogAPI.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/blog_ui.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/blog_ui.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pathUtils.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/pathUtils.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pathUtils.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/pathUtils.test.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -154,7 +146,7 @@
       <workItem from="1550265760070" duration="1325000" />
       <workItem from="1576442503567" duration="3379000" />
       <workItem from="1576608365031" duration="7983000" />
-      <workItem from="1576616381716" duration="3064000" />
+      <workItem from="1576616381716" duration="3286000" />
     </task>
     <servers />
   </component>
