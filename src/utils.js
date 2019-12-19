@@ -4,13 +4,6 @@ const REGEX_FILE_END = /\.[^.]{2,7}\s*$/;
 const REGEX_HEADING_DELIM = /[-_]/g;
 
 /**
- * @param {number} min
- * @param {number} max
- * @returns {number}
- */
-const randStep = (min = 0, max = 40) => min + Math.round(Math.random() * (max - min));
-
-/**
  * @param {string} heading
  * @returns {string}
  */
@@ -39,4 +32,4 @@ const countWords = txt => (txt.split(REGEX_WORDS) || []).length;
  */
 const getTimeToReadInMin = txt => Math.ceil(txt.length / 650);
 
-export { fmtHeading, randStep, countSent, countWords, getTimeToReadInMin };
+export { fmtHeading, countSent, countWords, getTimeToReadInMin };

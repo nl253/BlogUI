@@ -3,6 +3,7 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/build" />
       <excludeFolder url="file://$MODULE_DIR$/temp" />
       <excludeFolder url="file://$MODULE_DIR$/tmp" />
     </content>
@@ -11,5 +12,9 @@
     <orderEntry type="module" module-name="Blog" />
     <orderEntry type="module" module-name="BlogAPI" />
     <orderEntry type="module" module-name="BlogAPI" />
+    <orderEntry type="library" name="prism-css" level="application" />
+    <orderEntry type="library" name="prism-core" level="application" />
+    <orderEntry type="library" name="prism-autoloader" level="application" />
+    <orderEntry type="library" name="highlight" level="application" />
   </component>
 </module>
