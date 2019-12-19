@@ -4,10 +4,12 @@
   "private": true,
   "dependencies": {
     "bootstrap": "^4.2.1",
+    "highlight.js": "^9.17.1",
+    "marked": "^0.8.0",
     "node-sass": "^4.11.0",
+    "path-browserify": "^1.0.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
-    "path-browserify": "^1.0.0",
     "react-scripts": "3.3.0"
   },
   "scripts": {
@@ -44,9 +46,16 @@
   "eslintConfig": {
     "extends": "react-app"
   },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie < 11"
-  ]
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
 }
