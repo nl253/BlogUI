@@ -3,17 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="5b5cdcc3-bc97-4774-aea0-89396f5fb060" name="Default Changelist" comment="">
       <change afterPath="$PROJECT_DIR$/../BlogAPI/.idea/BlogAPI.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/blog_ui.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/blog_ui.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/norbe.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/norbe.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pathUtils.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pathUtils.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -163,8 +154,16 @@
       <workItem from="1576695018343" duration="12141000" />
       <workItem from="1576781683725" duration="6000" />
       <workItem from="1576781710889" duration="4045000" />
-      <workItem from="1576785809926" duration="4488000" />
+      <workItem from="1576785809926" duration="5110000" />
     </task>
+    <task id="LOCAL-00001" summary="Use GitHub api for post content">
+      <created>1576790357622</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1576790357622</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -174,6 +173,8 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$/../BlogAPI2" />
     </ignored-roots>
+    <MESSAGE value="Use GitHub api for post content" />
+    <option name="LAST_COMMIT_MESSAGE" value="Use GitHub api for post content" />
   </component>
   <component name="WindowStateProjectService">
     <state x="873" y="358" key="#ESLint" timestamp="1576610387834">
@@ -200,6 +201,10 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="1011" y="447" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.2560.1400@0.0.2560.1400" timestamp="1576706363197" />
+    <state x="905" y="294" key="CommitChangelistDialog2" timestamp="1576790356419">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="905" y="294" key="CommitChangelistDialog2/0.0.2560.1400@0.0.2560.1400" timestamp="1576790356419" />
     <state x="93" y="93" width="2375" height="1215" key="DiffContextDialog" timestamp="1576618723448">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
@@ -236,6 +241,10 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="782" y="342" key="SettingsEditor/0.0.2560.1400@0.0.2560.1400" timestamp="1576781739397" />
+    <state x="873" y="433" key="Vcs.Push.Dialog.v2" timestamp="1576790359005">
+      <screen x="0" y="0" width="2560" height="1400" />
+    </state>
+    <state x="873" y="433" key="Vcs.Push.Dialog.v2/0.0.2560.1400@0.0.2560.1400" timestamp="1576790359005" />
     <state x="1046" y="434" key="VcsDiffUtil.ChangesDialog" timestamp="1576612747215">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>

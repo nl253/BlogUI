@@ -29,11 +29,11 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.headers = {
-      Authorization: process.env.AUTHORIZATION,
+      Authorization: process.env.REACT_APP_AUTHORIZATION,
     };
     this.REGEX_FILE_END = /\.(m(ark)?d(own)?|x?html?)$/i;
-    this.apiRoot = process.env.API_ROOT;
-    this.assetsRoot = process.env.ASSETS_ROOT;
+    this.apiRoot = process.env.REACT_APP_API_ROOT;
+    this.assetsRoot = process.env.REACT_APP_ASSETS_ROOT;
     this.year = new Date(Date.now()).getFullYear().toString();
     this.postTextCache = new Map();
     this.state = {
