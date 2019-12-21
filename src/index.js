@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
 import {lexer, parser, Renderer, setOptions} from 'marked';
-import {Toast, ToastBody, ToastHeader} from 'reactstrap';
+import {Spinner, Toast, ToastBody, ToastHeader} from 'reactstrap';
 import {basename, dirname, join} from 'path-browserify';
 import 'highlight.js/styles/default.css';
 
@@ -49,8 +49,19 @@ class App extends Component {
     this.bannedWords = new Set(bannedWords);
     this.REGEX_FILE_END = /\.(m(ark)?d(own)?|x?html?)$/i;
     this.year = new Date(Date.now()).getFullYear().toString();
-    this.postTextCache = new Map();
+    this.pendingRequests = {
+      postText: [],
+      sentiment: [],
+      places: [],
+      organizations: [],
+      topics: [],
+      people: [],
+    };
+
+    this.dictCache = {};
+    this.postCache = {};
     this.state = {
+      sentiment: null,
       places: [],
       organizations: [],
       topics: [],
@@ -63,7 +74,7 @@ class App extends Component {
       definition: null,
       post: null,
       postText: '',
-      loading: ['root'],
+      loading: [],
     };
     this.init();
   }
@@ -79,6 +90,7 @@ class App extends Component {
   }
 
   async init() {
+    this.begin('root');
     try {
       const res = await fetch(`${process.env.REACT_APP_API_ROOT}/trees/master?recursive=1`, {
         mode: 'cors',
@@ -86,6 +98,9 @@ class App extends Component {
           Authorization: process.env.REACT_APP_AUTHORIZATION,
         }
       });
+      if (!res.ok) {
+        throw new Error(JSON.stringify(res.body));
+      }
       const json = await res.json();
       this.setState({
         root: {
@@ -102,7 +117,7 @@ class App extends Component {
     } catch (e) {
       console.error(e);
     }
-    this.setState(({ loading }) => ({ loading: loading.filter(l => l !== 'root') }));
+    this.end('root');
   }
 
   /**
@@ -167,51 +182,64 @@ class App extends Component {
     if (this.state.category === dirname(post) && this.state.post === basename(post)) {
       return;
     }
+    this.pendingRequests.postText.forEach(r => r.abort());
+    this.pendingRequests.postText = [];
+    this.begin('postText');
     window.history.pushState({}, `post ${basename(post)}`, post);
     this.setState({
       category: dirname(post),
       post: basename(post),
       postText: '',
-      topics: [],
-      people: [],
-      organizations: [],
-      places: [],
     });
-    const maybeCached = this.postTextCache.get(post);
-    if (maybeCached !== undefined) {
-      this.setState({postText: maybeCached});
-      return;
+    const maybeCached = this.postCache[post];
+    if (maybeCached === undefined) {
+      const postBlob = this.state.root.tree.find(node => node.type === 'blob' && node.path === post);
+      if (postBlob) {
+        const controller = new AbortController();
+        this.pendingRequests.postText = this.pendingRequests.postText.concat([controller]);
+        try {
+          const res = await fetch(
+            `${process.env.REACT_APP_API_ROOT}/blobs/${(postBlob.sha)}`, {
+              mode: 'cors',
+              signal: controller.signal,
+              headers: {
+                Authorization: process.env.REACT_APP_AUTHORIZATION,
+                Accept: 'application/json, *',
+              },
+            });
+          if (!res.ok) {
+            throw new Error(JSON.stringify(res.body));
+          }
+          const json = await res.json();
+          const markdown = json.encoding === 'base64'
+            ? atob(json.content)
+            : json.content;
+          const tokens = lexer(markdown);
+          const postText = parser(tokens);
+          this.postCache[post] = {...(this.postCache[post] || {}), postText};
+          this.setState({postText});
+        } catch (e) {
+          console.log(e);
+        } finally {
+          controller.abort();
+          this.pendingRequests.postText = this.pendingRequests.postText.filter(r => r !== controller);
+        }
+      } else {
+        console.warn(`could not find blob for post ${post}`);
+      }
+    } else {
+      this.setState({postText: maybeCached.postText});
     }
-    this.setState(({loading}) => ({loading: loading.concat(['postText'])}));
-    const postBlob = this.state.root.tree.find(node => node.type === 'blob' && node.path === post);
-    if (!postBlob) {
-      return;
+    this.end('postText');
+    if (this.state.postText) {
+      this.callNaturalApi('sentiment', null);
+      for (const type of ['topics', 'people', 'places', 'organizations']) {
+        this.callCompromiseApi(type, []);
+      }
+      this.makePostWordsClickable();
+      this.registerDefinitionsOnWordClick();
+      this.fixImgSrc();
     }
-    const res = await fetch(
-      `${process.env.REACT_APP_API_ROOT}/blobs/${(postBlob.sha)}`, {
-        mode: 'cors',
-        headers: {
-          Authorization: process.env.REACT_APP_AUTHORIZATION,
-          Accept: 'application/json, *',
-        },
-      });
-    const json = await res.json();
-    const markdown = json.encoding === 'base64'
-      ? atob(json.content)
-      : json.content;
-    const tokens = lexer(markdown);
-    const postText = parser(tokens);
-    this.postTextCache.set(post, postText);
-    this.setState(({ loading }) => ({
-      postText,
-      loading: loading.filter(l => l !== 'postText'),
-    }));
-    for (const type of ['topics', 'people', 'places', 'organizations']) {
-      this.callCompromiseApi(type);
-    }
-    this.makePostWordsClickable();
-    this.fixImgSrc();
-    this.registerDefinitionsOnWordClick();
   }
 
   makePostWordsClickable() {
@@ -240,6 +268,25 @@ class App extends Component {
   }
 
   /**
+   * @param {string} what
+   */
+  begin(what) {
+    this.state.loading.push(what);
+  }
+
+  /**
+   * @param {string} what
+   */
+  end(what) {
+    for (let i = 0; i < this.state.loading.length; i++) {
+      if (this.state.loading[i] === what) {
+        this.state.loading.splice(i, 1);
+        return;
+      }
+    }
+  }
+
+  /**
    * @param {string} category
    */
   absCategory(category) {
@@ -260,17 +307,31 @@ class App extends Component {
    */
   async tryDefine(word) {
     console.log(`defining ${word}`);
-    try {
-      const res = await fetch(`${process.env.REACT_APP_NLP_API_ROOT}/lookup?code=${process.env.REACT_APP_NLP_AUTHORIZATION}`, {
-        mode: 'cors',
-        body: JSON.stringify({word}),
-        method: 'post',
-        headers: {
-          Accept: 'application/json, *',
-          'Content-Type': 'application/json',
+    this.begin('word');
+    let definition = this.dictCache[word];
+    if (definition === undefined) {
+      try {
+        const res = await fetch(`${process.env.REACT_APP_NLP_API_ROOT}/lookup?code=${process.env.REACT_APP_NLP_AUTHORIZATION}`, {
+          mode: 'cors',
+          body: JSON.stringify({word}),
+          method: 'post',
+          headers: {
+            Accept: 'application/json, *',
+            'Content-Type': 'application/json',
+          }
+        });
+        if (!res.ok) {
+          throw new Error(JSON.stringify(res.body));
         }
-      });
-      this.setState({definition: (await res.json()).definition, word});
+        definition = (await res.json()).definition;
+        this.dictCache[word] = definition;
+      } catch (e) {
+        console.log(e.message);
+        this.dictCache[word] = null;
+      }
+    }
+    if (definition !== undefined) {
+      this.setState({definition, word});
       for (const p of document.querySelectorAll('.toast > .toast-body')) {
         for (const w of new Set(findAllMatches(p.innerText, /([a-zA-Z]{2,})/g))) {
           if (!this.bannedWords.has(w)) {
@@ -281,30 +342,109 @@ class App extends Component {
       for (const node of document.querySelectorAll('.toast > .toast-body .word')) {
         node.addEventListener('click', () => this.tryDefine(node.innerText));
       }
-    } catch (e) {
-      console.log(e.message);
     }
+    this.end('word');
   };
 
   /**
    * @param {string} type
    * @return {Promise<void>}
    */
-  async callCompromiseApi(type) {
-    try {
-      const res = await fetch(`${process.env.REACT_APP_NLP_API_ROOT}/compromise?code=${process.env.REACT_APP_NLP_AUTHORIZATION}`, {
-        mode: 'cors',
-        body: JSON.stringify({text: document.querySelector('#post-text').innerText, type}),
-        method: 'post',
-        headers: {
-          Accept: 'application/json, *',
-          'Content-Type': 'application/json',
+  async callCompromiseApi(type, zero = []) {
+    this.setState({ [type]:  zero});
+    this.pendingRequests[type].forEach(r => r.abort());
+    this.pendingRequests[type] = [];
+    this.begin(type);
+    const maybeCached = this.postCache[this.state.post];
+    if (maybeCached === undefined) {
+      const controller = new AbortController();
+      try {
+        const res = await fetch(
+          `${process.env.REACT_APP_NLP_API_ROOT}/compromise?code=${process.env.REACT_APP_NLP_AUTHORIZATION}`,
+          {
+            mode: 'cors',
+            signal: controller.signal,
+            body: JSON.stringify({text: [...document.getElementById('post-text').querySelectorAll('p')].map(p => p.innerText).join('\n').slice(0, 10000), type}),
+            method: 'post',
+            headers: {
+              Accept: 'application/json, *',
+              'Content-Type': 'application/json',
+            },
+          });
+        if (!res.ok) {
+          throw new Error(JSON.stringify(res.body));
         }
-      });
-      this.setState({ [type]: [...(new Set((await res.json()).filter(w => w.length > 2)))] });
-    } catch (e) {
-      console.error(e);
+        const json = await res.json();
+        const newValue = [
+          ...(new Set(json.filter(
+            w => w.length > 2 && w.search(/^[a-z 0-9.,&]+$/i) >= 0)))];
+        this.setState({
+          [type]: newValue,
+        });
+        this.postCache[this.state.post] = {
+          ...(this.postCache[this.state.post] || {}), [type]: newValue,
+        };
+      } catch (e) {
+        this.postCache[this.state.post] = null;
+        console.error(e);
+      } finally {
+        controller.abort();
+        this.pendingRequests[type] = this.pendingRequests[type].filter(r => r !== controller);
+      }
+    } else if (maybeCached !== null) {
+      this.setState({[type]: maybeCached[type]});
     }
+    this.end(type);
+  }
+
+  /**
+   * @param {string} action
+   * @return {Promise<void>}
+   */
+  async callNaturalApi(action, zero = null) {
+    this.setState({ [action]: zero });
+    this.pendingRequests[action].forEach(r => r.abort());
+    this.pendingRequests[action] = [];
+    this.begin(action);
+    const maybeCached = this.postCache[this.state.post];
+    if (maybeCached === undefined) {
+      const controller = new AbortController();
+      try {
+        const res = await fetch(`${process.env.REACT_APP_NLP_API_ROOT}/natural?code=${process.env.REACT_APP_NLP_AUTHORIZATION}`, {
+          mode: 'cors',
+          signal: controller.signal,
+          body: JSON.stringify({text: [...document.getElementById('post-text').querySelectorAll('p')].map(p => p.innerText).join('\n').slice(0, 10000), action}),
+          method: 'post',
+          headers: {
+            Accept: 'application/json, *',
+            'Content-Type': 'application/json',
+          }
+        });
+        if (!res.ok) {
+          throw new Error(JSON.stringify(res.body));
+        }
+        const newValue = await res.json();
+        this.setState({ [action]: newValue });
+        this.postCache[this.state.post] = { ...(this.postCache[this.state.post] || {}), [action]: newValue };
+      } catch (e) {
+        console.error(e);
+        this.postCache[this.state.post] = null;
+      } finally {
+        controller.abort();
+        this.pendingRequests[action] = this.pendingRequests[action].filter(r => r !== controller);
+      }
+    } else if (maybeCached !== zero) {
+      this.setState({ [action]: maybeCached[action] });
+    }
+    this.end(action);
+  }
+
+  /**
+   * @param {string} item
+   * @return {boolean}
+   */
+  didLoad(...item) {
+    return item.reduce((prev, focus) => prev && this.state.loading.indexOf(focus) < 0, true);
   }
 
   /**
@@ -312,7 +452,7 @@ class App extends Component {
    */
   render() {
     return (
-      !this.state.loading.some(l => l === 'root') &&
+      this.didLoad('root') &&
       <div>
         <Toast isOpen={!!this.state.definition}
                style={{position: 'fixed', zIndex: 99, bottom: '10px', left: '10px'}}
@@ -416,41 +556,53 @@ class App extends Component {
               )}
             </div>
           </section>
-          {!this.state.loading.some(l => l === 'postText') && this.state.postText && (
-            <section className="col-xl col-lg col-md-9 col-sm-12 container-fluid row justify-content-around">
-              <div className={`col-xl-3 col-lg-3 d-md-none d-sm-none`}/>
-              <section className={`col-xl-6 col-8-lg col-12-md col-12-sm`}>
-                <div id="post-text"
-                     dangerouslySetInnerHTML={{__html: this.state.postText}}
-                     className="my-4 my-xl-0 my-lg-0 my-md-4 my-sm-4"/>
+          {this.didLoad('postText') && this.state.postText
+            ? (
+              <section className="col-xl col-lg col-md-9 col-sm-12 container-fluid row justify-content-around">
+                <div className={`col-xl-3 col-lg-3 d-md-none d-sm-none`}/>
+                <section className={`col-xl-6 col-8-lg col-12-md col-12-sm`}>
+                  <div id="post-text"
+                       dangerouslySetInnerHTML={{__html: this.state.postText}}
+                       className="my-4 my-xl-0 my-lg-0 my-md-4 my-sm-4"/>
+                </section>
+                <div className={`col-xl-1 col-lg-1 d-md-none d-sm-none`}/>
+
+                <section className={`col-xl-1 col-lg-1 d-none d-xl-block d-lg-block d-md-none d-sm-none`}>
+                  <h3>Info</h3>
+                  <p className="mb-1">{getTimeToReadInMin(this.state.postText)} min read</p>
+                  <p className="mb-1">{countWords(this.state.postText)} words</p>
+                  <p>{countSent(this.state.postText)} sentences</p>
+                  <div>
+                    {['topics', 'people', 'places', 'organizations'].filter(type => this.state[type] && this.state[type].length > 0)
+                      .map((type, typeIdx) => (
+                        <div key={typeIdx}>
+                          <h4>{type.substr(0, 1).toUpperCase()}{type.substr(1)}</h4>
+                          <ul style={{listStyleType: 'none', padding: 0, margin: 0}}>
+                            {this.state[type].map((t, tIdx) => (
+                              <li key={tIdx}>
+                                <p style={{fontVariantCaps: 'all-petite-caps'}}>{t}</p>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>))}
+
+                    {this.state.sentiment && (
+                      <div>
+                        <h4>Sentiment</h4>
+                        <p style={{fontVariantCaps: 'all-petite-caps'}}>
+                          {this.state.sentiment.toFixed(3)}
+                        </p>
+                      </div>)}
+                  </div>
+                </section>
+                <div className={`col-xl-1 col-lg-1 d-md-none d-sm-none`}/>
               </section>
-              <div className={`col-xl-1 col-lg-1 d-md-none d-sm-none`}/>
-              <section className={`col-xl-1 col-lg-1 d-none d-xl-block d-lg-block d-md-none d-sm-none`}>
-                <h3>Info</h3>
-                <p className="mb-1">{getTimeToReadInMin(this.state.postText)} min read</p>
-                <p className="mb-1">{countWords(this.state.postText)} words</p>
-                <p>{countSent(this.state.postText)} sentences</p>
-                {['topics', 'people', 'places', 'organizations']
-                  .filter(type => this.state[type].length > 0)
-                  .map((type, typeIdx) => (
-                      <div key={typeIdx}>
-                        <h4>{type.substr(0, 1).toUpperCase()}{type.substr(1)}</h4>
-                        <ul style={{listStyleType: 'none', padding: 0, margin: 0}}>
-                          {this.state[type].map((t, tIdx) => (
-                            <li key={tIdx}>
-                              <p style={{fontVariantCaps: 'all-petite-caps'}}>
-                                {t}
-                              </p>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )
-                  )}
-              </section>
-              <div className={`col-xl-1 col-lg-1 d-md-none d-sm-none`}/>
-            </section>
-          )}
+            )
+            : (
+              <div className="mx-auto my-auto">
+                <Spinner style={{ width: '3rem', height: '3rem' }} />
+              </div>
+            )}
         </main>
         <footer className="py-4 bg-light d-none d-xl-block d-lg-block d-md-block d-sm-block border-top mt-xl-3 mt-1 mt-lg-3 mt-md-1 mt-sm-1">
           <div className="mx-auto mt-2 mb-4" style={{maxWidth: '370px'}}>
