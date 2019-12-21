@@ -171,7 +171,7 @@ class App extends Component {
       const postBlob = this.state.root.tree.find(
         node => node.type === 'blob' && node.path === post);
       if (postBlob) {
-        const res = await fetch(`${this.apiRoot}/blobs/${(postBlob.sha)}`, {
+        const res = await fetch(`${process.env.REACT_APP_API_ROOT}/blobs/${(postBlob.sha)}`, {
           mode: 'cors',
           headers: {
             Authorization: process.env.REACT_APP_AUTHORIZATION,
@@ -182,8 +182,8 @@ class App extends Component {
         const markdown = json.encoding === 'base64'
           ? atob(json.content)
           : json.content;
-        const tokens = lexer(markdown, { baseUrl: join(process.env.REACT_APP_ASSETS_ROOT, dirname(post)) });
-        const html = parser(tokens, { baseUrl: join (process.env.REACT_APP_ASSETS_ROOT, dirname(post)) });
+        const tokens = lexer(markdown);
+        const html = parser(tokens);
         const postText = html;
         this.postTextCache.set(post, html);
         this.setState(({loading}) => ({
@@ -201,14 +201,16 @@ class App extends Component {
             }
           });
 
+        document.querySelectorAll('img[src]').forEach(img => {
+          const src = img.getAttribute('src');
+          if (src && !src.startsWith('http')) {
+            img.setAttribute('src', join(process.env.REACT_APP_ASSETS_ROOT, this.state.category.substr(1), src));
+          }
+        });
+
         document
-          .querySelectorAll('.word')
-          .forEach(node => {
-
-            const word = node.innerText;
-
-            node.addEventListener('click', () => this.tryDefine(word));
-          });
+          .querySelectorAll('#post-text p .word, #post-text li .word')
+          .forEach(node => node.addEventListener('click', () => this.tryDefine(node.innerText)));
       }
     } else {
       this.setState({ postText: maybeCached });
@@ -247,6 +249,18 @@ class App extends Component {
         }
       });
       this.setState({definition: (await res.json()).definition, word});
+      document
+        .querySelectorAll('.toast > .toast-body')
+        .forEach(p => {
+          for (const w of new Set(findAllMatches(p.innerText, /([a-zA-Z]{2,})/g))) {
+            if (!this.bannedWords.has(w)) {
+              p.innerHTML = p.innerHTML.replace(new RegExp('\\b' + w + '\\b', 'g'), `<button class="word">${w}</button>`);
+            }
+          }
+        });
+      document
+        .querySelectorAll('.toast > .toast-body .word')
+        .forEach(node => node.addEventListener('click', () => this.tryDefine(node.innerText)));
     } catch (e) {
       console.log(e.message);
     }
@@ -261,6 +275,7 @@ class App extends Component {
       <div>
         <Toast isOpen={!!this.state.definition}
                style={{position: 'fixed', zIndex: 99, bottom: '10px', left: '10px'}}
+               transition={{exit: false, timeout: 10, enter: true, appear: true}}
                onClick={this.closeDefinition.bind(this)}>
           <ToastHeader>{this.state.word}</ToastHeader>
           <ToastBody>{this.state.definition}</ToastBody>
@@ -360,7 +375,7 @@ class App extends Component {
               )}
             </div>
           </section>
-          {!this.state.loading.some(l => l === 'postText') && (
+          {!this.state.loading.some(l => l === 'postText') && this.state.postText && (
             <section className="col-xl col-lg col-md-9 col-sm-12 container-fluid row justify-content-around">
               <div className={`col-xl-3 col-lg-3 d-md-none d-sm-none`}/>
               <section className={`col-xl-6 col-8-lg col-12-md col-12-sm`}>
