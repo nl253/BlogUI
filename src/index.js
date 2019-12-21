@@ -48,7 +48,6 @@ class App extends Component {
     super(props);
     this.bannedWords = new Set(bannedWords);
     this.REGEX_FILE_END = /\.(m(ark)?d(own)?|x?html?)$/i;
-    this.apiRoot = process.env.REACT_APP_API_ROOT;
     this.year = new Date(Date.now()).getFullYear().toString();
     this.postTextCache = new Map();
     this.state = {
@@ -77,7 +76,7 @@ class App extends Component {
 
   async init() {
     try {
-      const res = await fetch(`${this.apiRoot}/trees/master?recursive=1`, {
+      const res = await fetch(`${process.env.REACT_APP_API_ROOT}/trees/master?recursive=1`, {
         mode: 'cors',
         headers: {
           Authorization: process.env.REACT_APP_AUTHORIZATION,
@@ -87,7 +86,7 @@ class App extends Component {
       this.setState({
         root: {
           ...json,
-          tree: json.tree.filter(n => basename(n.path).indexOf('.') < 0 || n.path.search(this.REGEX_FILE_END) >= 0).map(n => ({...n, path: `/${n.path}`})),
+          tree: json.tree.filter(n => basename(n.path).indexOf('.') < 0 || this.isFile(n.path)).map(n => ({...n, path: `/${n.path}`})),
         }
       });
       const path = window.location.pathname;
