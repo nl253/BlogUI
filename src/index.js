@@ -1,16 +1,16 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
-import {basename, dirname, join} from 'path-browserify';
 import {lexer, parser, Renderer, setOptions} from 'marked';
+import {Toast, ToastBody, ToastHeader} from 'reactstrap';
+import {basename, dirname, join} from 'path-browserify';
 import 'highlight.js/styles/default.css';
 
 import './index.scss';
+import bannedWords from './bannedWords.json';
 import * as serviceWorker from './serviceWorker';
 import {countSent, countWords, fmtHeading, getTimeToReadInMin} from './utils';
 
-// Set options
-// `highlight` example uses `highlight.js`
 setOptions({
   renderer: new Renderer(),
   highlight: function(code) {
@@ -22,29 +22,46 @@ setOptions({
   sanitize: false,
   smartLists: true,
   smartypants: true,
-  xhtml: false
+  xhtml: false,
 });
+
+/**
+ * @param {string} s
+ * @param {RegExp} re
+ * @param {number} [group]
+ * @return {string[]}
+ */
+const findAllMatches = (s, re, group = 0) => {
+  const matches = [];
+  let m;
+  do {
+    m = re.exec(s);
+    if (m) {
+      matches.push(m[group]);
+    }
+  } while (m);
+  return matches;
+};
 
 class App extends Component {
   constructor(props) {
     super(props);
-    this.headers = {
-      Authorization: process.env.REACT_APP_AUTHORIZATION,
-    };
+    this.bannedWords = new Set(bannedWords);
     this.REGEX_FILE_END = /\.(m(ark)?d(own)?|x?html?)$/i;
     this.apiRoot = process.env.REACT_APP_API_ROOT;
-    this.assetsRoot = process.env.REACT_APP_ASSETS_ROOT;
     this.year = new Date(Date.now()).getFullYear().toString();
     this.postTextCache = new Map();
     this.state = {
+      toastVisible: false,
       root: null,
       category: null,
+      tmpWord: null,
+      word: null,
+      definition: null,
       post: null,
       postText: '',
       loading: ['root'],
     };
-    this.dirname = dirname;
-    this.basename = basename;
     this.init();
   }
 
@@ -54,9 +71,18 @@ class App extends Component {
    */
   isFile(path) { return path.search(this.REGEX_FILE_END) >= 0; }
 
+  closeDefinition() {
+    this.setState({ word: null, definition: null });
+  }
+
   async init() {
     try {
-      const res = await fetch(`${this.apiRoot}/trees/master?recursive=1`, { mode: 'cors', headers: this.headers });
+      const res = await fetch(`${this.apiRoot}/trees/master?recursive=1`, {
+        mode: 'cors',
+        headers: {
+          Authorization: process.env.REACT_APP_AUTHORIZATION,
+        }
+      });
       const json = await res.json();
       this.setState({
         root: {
@@ -146,23 +172,43 @@ class App extends Component {
       const postBlob = this.state.root.tree.find(
         node => node.type === 'blob' && node.path === post);
       if (postBlob) {
-        const res = await fetch(`${this.apiRoot}/blobs/${(postBlob.sha)}`,
-          {mode: 'cors', headers: this.headers});
+        const res = await fetch(`${this.apiRoot}/blobs/${(postBlob.sha)}`, {
+          mode: 'cors',
+          headers: {
+            Authorization: process.env.REACT_APP_AUTHORIZATION,
+            Accept: 'application/json, *',
+          }
+        });
         const json = await res.json();
         const markdown = json.encoding === 'base64'
           ? atob(json.content)
           : json.content;
-        const tokens = lexer(markdown);
-        const html = parser(tokens);
+        const tokens = lexer(markdown, { baseUrl: join(process.env.REACT_APP_ASSETS_ROOT, dirname(post)) });
+        const html = parser(tokens, { baseUrl: join (process.env.REACT_APP_ASSETS_ROOT, dirname(post)) });
+        const postText = html;
         this.postTextCache.set(post, html);
         this.setState(({loading}) => ({
-          postText: html,
+          postText,
           loading: loading.filter(l => l !== 'postText'),
         }));
+
         document
-          .querySelectorAll('img[src]')
+          .querySelectorAll('#post-text p, #post-text li')
+          .forEach(p => {
+            for (const w of new Set(findAllMatches(p.innerText, /([a-zA-Z]{2,})/g))) {
+              if (!this.bannedWords.has(w)) {
+                p.innerHTML = p.innerHTML.replace(new RegExp('\\b' + w + '\\b', 'g'), `<button class="word">${w}</button>`);
+              }
+            }
+          });
+
+        document
+          .querySelectorAll('.word')
           .forEach(node => {
-            node.setAttribute('src', `${this.assetsRoot}${this.state.category}/${node.getAttribute('src')}`);
+
+            const word = node.innerText;
+
+            node.addEventListener('click', () => this.tryDefine(word));
           });
       }
     } else {
@@ -187,12 +233,39 @@ class App extends Component {
   }
 
   /**
+   * @param {string} word
+   */
+  async tryDefine(word) {
+    console.log(`defining ${word}`);
+    try {
+      const res = await fetch(`${process.env.REACT_APP_NLP_API_ROOT}/lookup?code=${process.env.REACT_APP_NLP_AUTHORIZATION}`, {
+        mode: 'cors',
+        body: JSON.stringify({word}),
+        method: 'post',
+        headers: {
+          Accept: 'application/json, *',
+          'Content-Type': 'application/json',
+        }
+      });
+      this.setState({definition: (await res.json()).definition, word});
+    } catch (e) {
+      console.log(e.message);
+    }
+  };
+
+  /**
    * @returns {*}
    */
   render() {
     return (
       !this.state.loading.some(l => l === 'root') &&
       <div>
+        <Toast isOpen={!!this.state.definition}
+               style={{position: 'fixed', zIndex: 99, bottom: '10px', left: '10px'}}
+               onClick={this.closeDefinition.bind(this)}>
+          <ToastHeader>{this.state.word}</ToastHeader>
+          <ToastBody>{this.state.definition}</ToastBody>
+        </Toast>
         <main className="container-fluid mt-0 mt-xl-5 mt-lg-5 mt-md-0 mt-sm-0 d-flex no-gutters flex-column flex-xl-row flex-lg-row flex-md-row flex-sm-column" style={{minHeight: '84vh'}}>
           <section className="col-xl-2 col-lg-2 d-none d-xl-block d-lg-block d-md-none d-sm-none">
             {this.parentCategories.length > 0 && (

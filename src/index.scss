@@ -1,3 +1,5 @@
+@import "~bootstrap/scss/bootstrap";
+
 $font-weight-base:            300;
 $line-height-base:            1.30;
 
@@ -18,43 +20,43 @@ $headings-margin-bottom:    0.5em;
   font-variant-caps: all-petite-caps;
 }
 
-@import "~bootstrap/scss/functions";
-@import "~bootstrap/scss/variables";
-@import "~bootstrap/scss/mixins";
-@import "~bootstrap/scss/root";
-@import "~bootstrap/scss/reboot";
-@import "~bootstrap/scss/type";
+//@import "~bootstrap/scss/functions";
+//@import "~bootstrap/scss/variables";
+//@import "~bootstrap/scss/mixins";
+//@import "~bootstrap/scss/root";
+//@import "~bootstrap/scss/reboot";
+//@import "~bootstrap/scss/type";
 //@import "~bootstrap/scss/images";
-@import "~bootstrap/scss/code";
-@import "~bootstrap/scss/grid";
-//@import "~bootstrap/scss/tables";
-//@import "~bootstrap/scss/forms";
-@import "~bootstrap/scss/buttons";
-//@import "~bootstrap/scss/transitions";
-//@import "~bootstrap/scss/dropdown";
-//@import "~bootstrap/scss/button-group";
-//@import "~bootstrap/scss/input-group";
-//@import "~bootstrap/scss/custom-forms";
-//@import "~bootstrap/scss/nav";
-//@import "~bootstrap/scss/navbar";
-//@import "~bootstrap/scss/card";
-//@import "~bootstrap/scss/breadcrumb";
-//@import "~bootstrap/scss/pagination";
-//@import "~bootstrap/scss/badge";
-//@import "~bootstrap/scss/jumbotron";
-//@import "~bootstrap/scss/alert";
-//@import "~bootstrap/scss/progress";
-//@import "~bootstrap/scss/media";
-//@import "~bootstrap/scss/list-group";
-//@import "~bootstrap/scss/close";
-//@import "~bootstrap/scss/toasts";
-//@import "~bootstrap/scss/modal";
-//@import "~bootstrap/scss/tooltip";
-//@import "~bootstrap/scss/popover";
-//@import "~bootstrap/scss/carousel";
-//@import "~bootstrap/scss/spinners";
-@import "~bootstrap/scss/utilities";
-@import "~bootstrap/scss/print";
+//@import "~bootstrap/scss/code";
+//@import "~bootstrap/scss/grid";
+////@import "~bootstrap/scss/tables";
+////@import "~bootstrap/scss/forms";
+//@import "~bootstrap/scss/buttons";
+////@import "~bootstrap/scss/transitions";
+////@import "~bootstrap/scss/dropdown";
+////@import "~bootstrap/scss/button-group";
+////@import "~bootstrap/scss/input-group";
+////@import "~bootstrap/scss/custom-forms";
+////@import "~bootstrap/scss/nav";
+////@import "~bootstrap/scss/navbar";
+////@import "~bootstrap/scss/card";
+////@import "~bootstrap/scss/breadcrumb";
+////@import "~bootstrap/scss/pagination";
+////@import "~bootstrap/scss/badge";
+////@import "~bootstrap/scss/jumbotron";
+////@import "~bootstrap/scss/alert";
+////@import "~bootstrap/scss/progress";
+////@import "~bootstrap/scss/media";
+////@import "~bootstrap/scss/list-group";
+////@import "~bootstrap/scss/close";
+////@import "~bootstrap/scss/toasts";
+////@import "~bootstrap/scss/modal";
+////@import "~bootstrap/scss/tooltip";
+////@import "~bootstrap/scss/popover";
+////@import "~bootstrap/scss/carousel";
+////@import "~bootstrap/scss/spinners";
+//@import "~bootstrap/scss/utilities";
+//@import "~bootstrap/scss/print";
 
 body {
   font-size: 17.5px !important;
@@ -62,4 +64,19 @@ body {
 
 li {
   max-width: 70% !important;
+}
+
+button.word {
+  padding: inherit;
+  margin: 0 !important;
+  background: inherit;
+  font: inherit;
+  border: inherit;
+  outline: inherit;
+  width: inherit;
+  height: inherit;
+}
+
+.word:hover {
+  font-weight: bold;
 }

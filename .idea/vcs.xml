@@ -7,6 +7,7 @@
   </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../BlogAPI" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../NLPFuncAppJS" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../Notes" vcs="Git" />
   </component>
 </project>

@@ -3,8 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/../BlogAPI/.idea/Blog.iml" filepath="$PROJECT_DIR$/../BlogAPI/.idea/Blog.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../BlogAPI/.idea/BlogAPI.iml" filepath="$PROJECT_DIR$/../BlogAPI/.idea/BlogAPI.iml" />
       <module fileurl="file://$PROJECT_DIR$/../BlogAPI2/.idea/BlogAPI2.iml" filepath="$PROJECT_DIR$/../BlogAPI2/.idea/BlogAPI2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../NLPFuncAppJS/.idea/NLPFuncAppJS.iml" filepath="$PROJECT_DIR$/../NLPFuncAppJS/.idea/NLPFuncAppJS.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Notes/.idea/Notes.iml" filepath="$PROJECT_DIR$/../Notes/.idea/Notes.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/blog_ui.iml" filepath="$PROJECT_DIR$/.idea/blog_ui.iml" />
     </modules>
   </component>
