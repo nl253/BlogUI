@@ -1,11 +1,16 @@
 <component name="ProjectDictionaryState">
   <dictionary name="norbe">
     <words>
+      <w>damerau</w>
       <w>delim</w>
       <w>hljs</w>
       <w>ignorecase</w>
       <w>isdir</w>
       <w>isfile</w>
+      <w>jaro</w>
+      <w>punct</w>
+      <w>treebank</w>
+      <w>winkler</w>
     </words>
   </dictionary>
 </component>

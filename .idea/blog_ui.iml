@@ -10,11 +10,11 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Blog" />
-    <orderEntry type="module" module-name="BlogAPI" />
-    <orderEntry type="module" module-name="BlogAPI" />
     <orderEntry type="library" name="prism-css" level="application" />
     <orderEntry type="library" name="prism-core" level="application" />
     <orderEntry type="library" name="prism-autoloader" level="application" />
     <orderEntry type="library" name="highlight" level="application" />
+    <orderEntry type="module" module-name="NLPFuncAppJS" />
+    <orderEntry type="module" module-name="Notes" />
   </component>
 </module>

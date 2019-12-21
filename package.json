@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "reactstrap": "^8.2.0",
     "bootstrap": "^4.2.1",
     "highlight.js": "^9.17.1",
     "marked": "^0.8.0",
