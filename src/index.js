@@ -51,6 +51,10 @@ class App extends Component {
     this.year = new Date(Date.now()).getFullYear().toString();
     this.postTextCache = new Map();
     this.state = {
+      places: [],
+      organizations: [],
+      topics: [],
+      people: [],
       toastVisible: false,
       root: null,
       category: null,
@@ -164,56 +168,74 @@ class App extends Component {
       return;
     }
     window.history.pushState({}, `post ${basename(post)}`, post);
-    this.setState({category: dirname(post), post: basename(post), postText: ''});
+    this.setState({
+      category: dirname(post),
+      post: basename(post),
+      postText: '',
+      topics: [],
+      people: [],
+      organizations: [],
+      places: [],
+    });
     const maybeCached = this.postTextCache.get(post);
-    if (maybeCached === undefined) {
-      this.setState(({loading}) => ({loading: loading.concat(['postText'])}));
-      const postBlob = this.state.root.tree.find(
-        node => node.type === 'blob' && node.path === post);
-      if (postBlob) {
-        const res = await fetch(`${process.env.REACT_APP_API_ROOT}/blobs/${(postBlob.sha)}`, {
-          mode: 'cors',
-          headers: {
-            Authorization: process.env.REACT_APP_AUTHORIZATION,
-            Accept: 'application/json, *',
-          }
-        });
-        const json = await res.json();
-        const markdown = json.encoding === 'base64'
-          ? atob(json.content)
-          : json.content;
-        const tokens = lexer(markdown);
-        const html = parser(tokens);
-        const postText = html;
-        this.postTextCache.set(post, html);
-        this.setState(({loading}) => ({
-          postText,
-          loading: loading.filter(l => l !== 'postText'),
-        }));
+    if (maybeCached !== undefined) {
+      this.setState({postText: maybeCached});
+      return;
+    }
+    this.setState(({loading}) => ({loading: loading.concat(['postText'])}));
+    const postBlob = this.state.root.tree.find(node => node.type === 'blob' && node.path === post);
+    if (!postBlob) {
+      return;
+    }
+    const res = await fetch(
+      `${process.env.REACT_APP_API_ROOT}/blobs/${(postBlob.sha)}`, {
+        mode: 'cors',
+        headers: {
+          Authorization: process.env.REACT_APP_AUTHORIZATION,
+          Accept: 'application/json, *',
+        },
+      });
+    const json = await res.json();
+    const markdown = json.encoding === 'base64'
+      ? atob(json.content)
+      : json.content;
+    const tokens = lexer(markdown);
+    const postText = parser(tokens);
+    this.postTextCache.set(post, postText);
+    this.setState(({ loading }) => ({
+      postText,
+      loading: loading.filter(l => l !== 'postText'),
+    }));
+    for (const type of ['topics', 'people', 'places', 'organizations']) {
+      this.callCompromiseApi(type);
+    }
+    this.makePostWordsClickable();
+    this.fixImgSrc();
+    this.registerDefinitionsOnWordClick();
+  }
 
-        document
-          .querySelectorAll('#post-text p, #post-text li')
-          .forEach(p => {
-            for (const w of new Set(findAllMatches(p.innerText, /([a-zA-Z]{2,})/g))) {
-              if (!this.bannedWords.has(w)) {
-                p.innerHTML = p.innerHTML.replace(new RegExp('\\b' + w + '\\b', 'g'), `<button class="word">${w}</button>`);
-              }
-            }
-          });
-
-        document.querySelectorAll('img[src]').forEach(img => {
-          const src = img.getAttribute('src');
-          if (src && !src.startsWith('http')) {
-            img.setAttribute('src', join(process.env.REACT_APP_ASSETS_ROOT, this.state.category.substr(1), src));
-          }
-        });
-
-        document
-          .querySelectorAll('#post-text p .word, #post-text li .word')
-          .forEach(node => node.addEventListener('click', () => this.tryDefine(node.innerText)));
+  makePostWordsClickable() {
+    for (const p of document.querySelectorAll('#post-text p, #post-text li')) {
+      for (const w of new Set(findAllMatches(p.innerText, /([a-zA-Z]{2,})/g))) {
+        if (!this.bannedWords.has(w)) {
+          p.innerHTML = p.innerHTML.replace(new RegExp('\\b' + w + '\\b', 'g'), `<button class="word">${w}</button>`);
+        }
       }
-    } else {
-      this.setState({ postText: maybeCached });
+    }
+  }
+
+  registerDefinitionsOnWordClick() {
+    for (const node of document.querySelectorAll('#post-text p .word, #post-text li .word')) {
+      node.addEventListener('click', () => this.tryDefine(node.innerText));
+    }
+  }
+
+  fixImgSrc() {
+    for (const img of document.querySelectorAll('img[src]')) {
+      const src = img.getAttribute('src');
+      if (src && !src.startsWith('http')) {
+        img.setAttribute('src', join(process.env.REACT_APP_ASSETS_ROOT, this.state.category.substr(1), src));
+      }
     }
   }
 
@@ -249,22 +271,41 @@ class App extends Component {
         }
       });
       this.setState({definition: (await res.json()).definition, word});
-      document
-        .querySelectorAll('.toast > .toast-body')
-        .forEach(p => {
-          for (const w of new Set(findAllMatches(p.innerText, /([a-zA-Z]{2,})/g))) {
-            if (!this.bannedWords.has(w)) {
-              p.innerHTML = p.innerHTML.replace(new RegExp('\\b' + w + '\\b', 'g'), `<button class="word">${w}</button>`);
-            }
+      for (const p of document.querySelectorAll('.toast > .toast-body')) {
+        for (const w of new Set(findAllMatches(p.innerText, /([a-zA-Z]{2,})/g))) {
+          if (!this.bannedWords.has(w)) {
+            p.innerHTML = p.innerHTML.replace(new RegExp('\\b' + w + '\\b', 'g'), `<button class="word">${w}</button>`);
           }
-        });
-      document
-        .querySelectorAll('.toast > .toast-body .word')
-        .forEach(node => node.addEventListener('click', () => this.tryDefine(node.innerText)));
+        }
+      }
+      for (const node of document.querySelectorAll('.toast > .toast-body .word')) {
+        node.addEventListener('click', () => this.tryDefine(node.innerText));
+      }
     } catch (e) {
       console.log(e.message);
     }
   };
+
+  /**
+   * @param {string} type
+   * @return {Promise<void>}
+   */
+  async callCompromiseApi(type) {
+    try {
+      const res = await fetch(`${process.env.REACT_APP_NLP_API_ROOT}/compromise?code=${process.env.REACT_APP_NLP_AUTHORIZATION}`, {
+        mode: 'cors',
+        body: JSON.stringify({text: document.querySelector('#post-text').innerText, type}),
+        method: 'post',
+        headers: {
+          Accept: 'application/json, *',
+          'Content-Type': 'application/json',
+        }
+      });
+      this.setState({ [type]: [...(new Set((await res.json()).filter(w => w.length > 2)))] });
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   /**
    * @returns {*}
@@ -389,6 +430,23 @@ class App extends Component {
                 <p className="mb-1">{getTimeToReadInMin(this.state.postText)} min read</p>
                 <p className="mb-1">{countWords(this.state.postText)} words</p>
                 <p>{countSent(this.state.postText)} sentences</p>
+                {['topics', 'people', 'places', 'organizations']
+                  .filter(type => this.state[type].length > 0)
+                  .map((type, typeIdx) => (
+                      <div key={typeIdx}>
+                        <h4>{type.substr(0, 1).toUpperCase()}{type.substr(1)}</h4>
+                        <ul style={{listStyleType: 'none', padding: 0, margin: 0}}>
+                          {this.state[type].map((t, tIdx) => (
+                            <li key={tIdx}>
+                              <p style={{fontVariantCaps: 'all-petite-caps'}}>
+                                {t}
+                              </p>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )
+                  )}
               </section>
               <div className={`col-xl-1 col-lg-1 d-md-none d-sm-none`}/>
             </section>
