@@ -1,13 +1,19 @@
 import { basename, join } from 'path-browserify';
 
-import { isFile } from './utils';
+import {isFile} from './utils';
 
 const RUNNING_REQUESTS = {
   allData: undefined,
+  definition: undefined,
+  people: undefined,
+  places: undefined,
+  organizations: undefined,
+  topics: undefined,
   mdToHtml: undefined,
 };
 
 const CACHE = {
+  definitions: {},
   postText: {},
   people: {},
   places: {},
@@ -132,10 +138,94 @@ const callCompromiseApi = async (post, category, postText, type) => {
       delete RUNNING_REQUESTS[type];
     }
   } else if (maybeCached) {
-    result = maybeCached[type];
+    result = maybeCached;
   }
   return result;
 };
 
+/**
+ * @param {string} post
+ * @param {string} category
+ * @param {string} postText
+ * @param {'distance'|'match'|'sentiment'|'stem'|'tokenize'|'tokenizeAndStem'} action
+ */
+const callNaturalApi = async (post, category, postText, action) => {
+  if (RUNNING_REQUESTS[action] !== undefined) {
+    RUNNING_REQUESTS[action].abort();
+    delete RUNNING_REQUESTS[action];
+  }
+  let result = null;
+  const postPath = join(category, post);
+  const maybeCached = CACHE[action][postPath];
+  if (maybeCached === undefined) {
+    const controller = new AbortController();
+    RUNNING_REQUESTS[action] = controller;
+    try {
+      const res = await fetch(`${process.env.REACT_APP_NLP_API_ROOT}/natural`, {
+        mode: 'cors',
+        signal: controller.signal,
+        body: JSON.stringify({text: postText, action}),
+        method: 'post',
+        headers: {
+          Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
+          Accept: 'application/json, *',
+          'Content-Type': 'application/json',
+        }
+      });
+      if (!res.ok) {
+        throw new Error(JSON.stringify(res.body));
+      }
+      const result = await res.json();
+      CACHE[action][postPath] = result;
+    } catch (e) {
+      console.error(e);
+      CACHE[action][postPath] = null;
+    } finally {
+      delete RUNNING_REQUESTS[action];
+    }
+  } else if (maybeCached) {
+    result = maybeCached;
+  }
+  return result;
+};
 
-export { getBlogData, mdToHtml, callCompromiseApi };
+/**
+ * @param {string} word
+ * @return {Promise<string>}
+ */
+const define = async (word) => {
+  const maybeCached = CACHE.definitions[word];
+  let result = null;
+  if (maybeCached === undefined) {
+    const controller = new AbortController();
+    RUNNING_REQUESTS.definition = controller;
+    try {
+      const res = await fetch(`${process.env.REACT_APP_NLP_API_ROOT}/lookup`, {
+        mode: 'cors',
+        signal: controller.signal,
+        body: JSON.stringify({word}),
+        method: 'post',
+        headers: {
+          Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
+          Accept: 'application/json, *',
+          'Content-Type': 'application/json',
+        }
+      });
+      if (!res.ok) {
+        throw new Error(JSON.stringify(res.body));
+      }
+      result = (await res.json()).definition;
+      CACHE.definitions[word] = result;
+    } catch (e) {
+      console.error(e.message);
+      CACHE.definitions[word] = null;
+    } finally {
+      delete RUNNING_REQUESTS.definition;
+    }
+  } else if (maybeCached) {
+    result = maybeCached;
+  }
+  return result;
+};
+
+export { getBlogData, mdToHtml, callCompromiseApi, callNaturalApi, define };

@@ -19,7 +19,13 @@ import {
   getTimeToReadInMin,
   isFile,
 } from './utils';
-import {mdToHtml, callCompromiseApi, getBlogData} from './api';
+import {
+  define,
+  mdToHtml,
+  callCompromiseApi,
+  callNaturalApi,
+  getBlogData,
+} from './api';
 
 
 class App extends Component {
@@ -229,8 +235,15 @@ class App extends Component {
     if (this.state.postText) {
       const p = Promise.all(
         this.naturalApiRequests
-          .map(type => this.callNaturalApi(type, null))
-          .concat(this.compromiseApiRequests.map(async type => {
+          .map(async (type) => {
+            this.setState({ [type]:  null});
+            this.beginLoading(type);
+            this.setState({
+              [type]: await callNaturalApi(this.state.post, this.state.category, this.getPostBody(), type),
+            });
+            this.endLoading(type);
+          })
+          .concat(this.compromiseApiRequests.map(async (type) => {
             this.setState({ [type]:  []});
             this.beginLoading(type);
             this.setState({
@@ -238,8 +251,8 @@ class App extends Component {
             });
             this.endLoading(type);
           })));
-      this.makePostWordsClickable();
-      this.registerDefinitionsOnWordClick();
+      this.makeClickable('#post-text p, #post-text li');
+      this.registerDefinitionsOnWordClick('#post-text p .word, #post-text li .word');
       this.fixImgSrc();
       try {
         await p;
@@ -249,8 +262,11 @@ class App extends Component {
     }
   }
 
-  makePostWordsClickable() {
-    const nodes = document.querySelectorAll('#post-text p, #post-text li');
+  /**
+   * @param {string} selector
+   */
+  makeClickable(selector) {
+    const nodes = document.querySelectorAll(selector);
     for (const n of nodes) {
       for (const child of n.childNodes) {
         if (child.nodeName === '#text') {
@@ -265,9 +281,26 @@ class App extends Component {
     }
   }
 
-  registerDefinitionsOnWordClick() {
-    for (const node of document.querySelectorAll('#post-text p .word, #post-text li .word')) {
-      node.addEventListener('click', () => this.tryDefine(node.innerText));
+  /**
+   * @param {string} selector
+   */
+  registerDefinitionsOnWordClick(selector) {
+    for (const node of document.querySelectorAll(selector)) {
+      node.addEventListener('click', async () => {
+        const word = node.innerText;
+        try {
+          const definition = await define(word);
+          if (definition) {
+            this.setState({ word, definition });
+            this.makeClickable('.toast > .toast-body');
+            this.registerDefinitionsOnWordClick('.toast > .toast-body .word');
+          }
+        } catch (e) {
+          console.error(e);
+        } finally {
+          this.endLoading('word');
+        }
+      });
     }
   }
 
@@ -327,100 +360,12 @@ class App extends Component {
   }
 
   /**
-   * @param {string} word
-   */
-  async tryDefine(word) {
-    console.log(`defining ${word}`);
-    this.beginLoading('word');
-    let definition = this.cache.definitions[word];
-    if (definition === undefined) {
-      try {
-        const res = await fetch(`${process.env.REACT_APP_NLP_API_ROOT}/lookup`, {
-          mode: 'cors',
-          body: JSON.stringify({word}),
-          method: 'post',
-          headers: {
-            Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
-            Accept: 'application/json, *',
-            'Content-Type': 'application/json',
-          }
-        });
-        if (!res.ok) {
-          throw new Error(JSON.stringify(res.body));
-        }
-        definition = (await res.json()).definition;
-        this.cache.definitions[word] = definition;
-      } catch (e) {
-        console.error(e.message);
-        this.cache.definitions[word] = null;
-      }
-    }
-    if (definition !== undefined) {
-      this.setState({definition, word});
-      for (const p of document.querySelectorAll('.toast > .toast-body')) {
-        for (const w of new Set(findAllMatches(p.innerText, /([a-zA-Z]{2,})/g))) {
-          if (!this.bannedWords.has(w)) {
-            p.innerHTML = p.innerHTML.replace(new RegExp('\\b' + w + '\\b', 'g'), `<button class="word">${w}</button>`);
-          }
-        }
-      }
-      for (const node of document.querySelectorAll('.toast > .toast-body .word')) {
-        node.addEventListener('click', () => this.tryDefine(node.innerText));
-      }
-    }
-    this.endLoading('word');
-  };
-
-  /**
    * @return {string}
    */
   getPostBody(slice = true) {
     const s = [...document.getElementById('post-text').querySelectorAll('p')].map(p => p.innerText).join('\n');
     return slice ? s.slice(0, 10000) : s;
   }
-
-  /**
-   * @param {string} action
-   * @return {Promise<void>}
-   */
-  async callNaturalApi(action, zero = null) {
-    this.setState({ [action]: zero });
-    this.clearRequests(action);
-    this.beginLoading(action);
-    const maybeCached = this.cache.post[this.state.post];
-    if (maybeCached === undefined) {
-      const controller = new AbortController();
-      try {
-        const res = await fetch(`${process.env.REACT_APP_NLP_API_ROOT}/natural`, {
-          mode: 'cors',
-          signal: controller.signal,
-          body: JSON.stringify({text: this.getPostBody(), action}),
-          method: 'post',
-          headers: {
-            Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
-            Accept: 'application/json, *',
-            'Content-Type': 'application/json',
-          }
-        });
-        if (!res.ok) {
-          throw new Error(JSON.stringify(res.body));
-        }
-        const newValue = await res.json();
-        this.setState({ [action]: newValue });
-        this.cache.post[this.state.post] = { ...(this.cache.post[this.state.post] || {}), [action]: newValue };
-      } catch (e) {
-        console.error(e);
-        this.cache.post[this.state.post] = null;
-      } finally {
-        controller.abort();
-        this.pendingRequests[action] = this.pendingRequests[action].filter(r => r !== controller);
-      }
-    } else if (maybeCached !== zero) {
-      this.setState({ [action]: maybeCached[action] });
-    }
-    this.endLoading(action);
-  }
-
 
   /**
    * @returns {*}
