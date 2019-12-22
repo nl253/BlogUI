@@ -1,3 +1,6 @@
+import {basename} from 'path-browserify';
+
+const REGEX_FILE_END_MD = /\.(m(ark)?d(own)?|x?html?)$/i;
 const REGEX_WORDS = /( |\r\n|\n|\r|\t)+/;
 const REGEX_SENT = /\.(\s+|\s*$)|\S{8,}[ \t]*(\n|\r\n|\r){2,}/gm;
 const REGEX_FILE_END = /\.[^.]{2,7}\s*$/;
@@ -32,4 +35,43 @@ const countWords = txt => (txt.split(REGEX_WORDS) || []).length;
  */
 const getTimeToReadInMin = txt => Math.ceil(txt.length / 650);
 
-export { fmtHeading, countSent, countWords, getTimeToReadInMin };
+/**
+ * @param {string} s
+ * @param {RegExp} re
+ * @param {number} [group]
+ * @return {string[]}
+ */
+const findAllMatches = (s, re, group = 0) => {
+  const matches = [];
+  let m;
+  do {
+    m = re.exec(s);
+    if (m) {
+      matches.push(m[group]);
+    }
+  } while (m);
+  return matches;
+};
+
+/**
+ * @param {string} path
+ * @return {boolean}
+ */
+const isDotFile = path => basename(path)[0] === '.';
+
+
+/**
+ * @param {string} path
+ * @return {boolean}
+ */
+const isFile = path  => path.search(REGEX_FILE_END_MD) >= 0;
+
+export {
+  fmtHeading,
+  countSent,
+  countWords,
+  getTimeToReadInMin,
+  findAllMatches,
+  isDotFile,
+  isFile,
+};
