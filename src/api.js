@@ -1,4 +1,5 @@
 import { basename, join } from 'path-browserify';
+import { parser, lexer } from 'marked';
 
 import {isDotFile, isFile} from './utils';
 
@@ -89,6 +90,8 @@ const mdToHtml = async (md) => {
   }
   return result;
 };
+
+const mdToHtmlLocally = async (md) => parser(lexer(md));
 
 /**
  * @param {string} post
@@ -255,7 +258,7 @@ const getPostHTML = async (sha) => {
       const markdown = json.encoding === 'base64'
         ? atob(json.content)
         : json.content;
-      const postText = await mdToHtml(markdown);
+      const postText = await mdToHtmlLocally(markdown);
       CACHE.postText[sha] = postText;
       result = postText;
     } catch (e) {
@@ -275,5 +278,6 @@ export {
   callCompromiseApi,
   callNaturalApi,
   define,
+  mdToHtmlLocally,
   getPostHTML,
 };
