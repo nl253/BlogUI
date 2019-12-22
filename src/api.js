@@ -228,4 +228,52 @@ const define = async (word) => {
   return result;
 };
 
-export { getBlogData, mdToHtml, callCompromiseApi, callNaturalApi, define };
+/**
+ * @param {string} sha
+ * @return {Promise<string>}
+ */
+const getPostHTML = async (sha) => {
+  let result = null;
+  const maybeCached = CACHE.postText[sha];
+  if (maybeCached === undefined) {
+    const controller = new AbortController();
+    RUNNING_REQUESTS.postText = controller;
+    try {
+      const res = await fetch(
+        `${process.env.REACT_APP_API_ROOT}/blobs/${sha}`, {
+          mode: 'cors',
+          signal: controller.signal,
+          headers: {
+            Authorization: process.env.REACT_APP_AUTHORIZATION,
+            Accept: 'application/json, *',
+          },
+        });
+      if (!res.ok) {
+        throw new Error(JSON.stringify(res.body));
+      }
+      const json = await res.json();
+      const markdown = json.encoding === 'base64'
+        ? atob(json.content)
+        : json.content;
+      const postText = await mdToHtml(markdown);
+      CACHE.postText[sha] = postText;
+      result = postText;
+    } catch (e) {
+      console.error(e);
+    } finally {
+      delete RUNNING_REQUESTS.postText;
+    }
+  } else if (maybeCached) {
+    result = maybeCached;
+  }
+  return result;
+};
+
+export {
+  getBlogData,
+  mdToHtml,
+  callCompromiseApi,
+  callNaturalApi,
+  define,
+  getPostHTML,
+};

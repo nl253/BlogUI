@@ -21,7 +21,7 @@ import {
 } from './utils';
 import {
   define,
-  mdToHtml,
+  getPostHTML,
   callCompromiseApi,
   callNaturalApi,
   getBlogData,
@@ -41,14 +41,7 @@ class App extends Component {
       'topics',
       'people',
     ];
-    this.pendingRequests = {
-      postText: [],
-      ...Object.fromEntries(this.naturalApiRequests.map(e => [e, []])),
-      ...Object.fromEntries(this.compromiseApiRequests.map(e => [e, []])),
-    };
     this.cache = {
-      definitions: {},
-      post: {},
       categories: {},
       posts: {},
       trees: undefined,
@@ -171,21 +164,12 @@ class App extends Component {
   }
 
   /**
-   * @param {string} what
-   */
-  clearRequests(what) {
-    this.pendingRequests[what].forEach(r => r.abort());
-    this.pendingRequests[what] = [];
-  }
-
-  /**
    * @param {string} post
    */
   async absPost(post) {
     if (this.state.category === dirname(post) && this.state.post === basename(post)) {
       return;
     }
-    this.clearRequests('postText');
     this.beginLoading('postText');
     window.history.pushState({}, `post ${basename(post)}`, post);
     this.setState({
@@ -193,72 +177,41 @@ class App extends Component {
       post: basename(post),
       postText: '',
     });
-    const maybeCached = this.cache.post[post];
-    if (maybeCached === undefined) {
-      const postBlob = this.blobs.find(node => node.path === post);
-      if (postBlob) {
-        const controller = new AbortController();
-        this.pendingRequests.postText = this.pendingRequests.postText.concat([controller]);
-        try {
-          const res = await fetch(
-            `${process.env.REACT_APP_API_ROOT}/blobs/${(postBlob.sha)}`, {
-              mode: 'cors',
-              signal: controller.signal,
-              headers: {
-                Authorization: process.env.REACT_APP_AUTHORIZATION,
-                Accept: 'application/json, *',
-              },
-            });
-          if (!res.ok) {
-            throw new Error(JSON.stringify(res.body));
-          }
-          const json = await res.json();
-          const markdown = json.encoding === 'base64'
-            ? atob(json.content)
-            : json.content;
-          const postText = await mdToHtml(markdown);
-          this.cache.post[post] = {...(this.cache.post[post] || {}), postText};
-          this.setState({postText});
-        } catch (e) {
-          console.error(e);
-        } finally {
-          controller.abort();
-          this.pendingRequests.postText = this.pendingRequests.postText.filter(r => r !== controller);
-        }
-      } else {
-        console.warn(`could not find blob for post ${post}`);
-      }
-    } else {
-      this.setState({postText: maybeCached.postText});
+    const postBlob = this.blobs.find(node => node.path === post);
+    if (!postBlob) {
+      console.warn(`could not find blob for post ${post}`);
+      return;
     }
-    this.endLoading('postText');
-    if (this.state.postText) {
-      const p = Promise.all(
-        this.naturalApiRequests
-          .map(async (type) => {
-            this.setState({ [type]:  null});
+    try {
+      const postText = await getPostHTML(postBlob.sha);
+      this.setState({postText});
+      this.endLoading('postText');
+      if (this.state.postText) {
+        const p = Promise.all([
+          ...this.naturalApiRequests.map(async (type) => {
+            this.setState({[type]: null});
             this.beginLoading(type);
             this.setState({
               [type]: await callNaturalApi(this.state.post, this.state.category, this.getPostBody(), type),
             });
             this.endLoading(type);
-          })
-          .concat(this.compromiseApiRequests.map(async (type) => {
-            this.setState({ [type]:  []});
+          }),
+          ...this.compromiseApiRequests.map(async (type) => {
+            this.setState({[type]: []});
             this.beginLoading(type);
             this.setState({
               [type]: await callCompromiseApi(this.state.post, this.state.category, this.getPostBody(), type),
             });
             this.endLoading(type);
-          })));
-      this.makeClickable('#post-text p, #post-text li');
-      this.registerDefinitionsOnWordClick('#post-text p .word, #post-text li .word');
-      this.fixImgSrc();
-      try {
+          })
+        ]);
+        this.makeClickable('#post-text p, #post-text li');
+        this.registerDefinitionsOnWordClick('#post-text p .word, #post-text li .word');
+        this.fixImgSrc();
         await p;
-      } catch (e) {
-        console.error(e)
       }
+    } catch (e) {
+      console.error(e);
     }
   }
 
