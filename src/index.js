@@ -3,8 +3,6 @@ import ReactDOM from 'react-dom';
 
 import {Spinner, Toast, ToastBody, ToastHeader} from 'reactstrap';
 import {basename, dirname, join} from 'path-browserify';
-import 'highlight.js/styles/default.css';
-
 import { author } from '../package.json';
 
 import './index.scss';

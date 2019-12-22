@@ -3,15 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "react-scripts": "3.3.0",
+    "node-sass": "^4.11.0",
     "reactstrap": "^8.2.0",
     "bootstrap": "^4.2.1",
-    "highlight.js": "^9.17.1",
     "marked": "^0.8.0",
-    "node-sass": "^4.11.0",
     "path-browserify": "^1.0.0",
     "react": "^16.7.0",
-    "react-dom": "^16.7.0",
-    "react-scripts": "3.3.0"
+    "react-dom": "^16.7.0"
   },
   "scripts": {
     "start": "react-scripts start",
