@@ -1,6 +1,6 @@
 import { basename, join } from 'path-browserify';
 
-import {isFile} from './utils';
+import {isDotFile, isFile} from './utils';
 
 const RUNNING_REQUESTS = {
   allData: undefined,
@@ -47,7 +47,7 @@ const getBlogData = async () => {
     const json = await res.json();
     result = {
       ...json,
-      tree: json.tree.filter(n => basename(n.path).indexOf('.') < 0 || isFile(n.path)).map(n => ({...n, path: `/${n.path}`})),
+      tree: json.tree.filter(n => !isDotFile(n.path) && (basename(n.path).indexOf('.') < 0 || isFile(n.path))).map(n => ({...n, path: `/${n.path}`})),
     };
   } catch (e) {
     console.error(e);

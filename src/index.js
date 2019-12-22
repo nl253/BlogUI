@@ -15,7 +15,6 @@ import {
   countSent,
   countWords,
   fmtHeading,
-  isDotFile,
   getTimeToReadInMin,
   isFile,
 } from './utils';
@@ -78,24 +77,33 @@ class App extends Component {
     this.endLoading('_root');
   }
 
+  /**
+   * @return {Record<string, {path: string, url: string, sha: string}>}
+   */
   get trees() {
     if (this.cache.trees !== undefined) {
       return this.cache.trees;
     }
-    const trees = this.state._root.tree
-      .filter(node => node.type === 'tree' && !isDotFile(node.path))
-      .sort((a, b) => basename(a.path).localeCompare(basename(b.path)));
+    const trees = Object.fromEntries(
+      this.state._root.tree
+        .filter(node => node.type === 'tree')
+        .sort((a, b) => basename(a.path).localeCompare(basename(b.path)))
+        .map(node => ([node.path, node])));
     this.cache.trees = trees;
     return trees;
   }
 
+  /**
+   * @return {Record<string, {path: string, url: string, sha: string}>}
+   */
   get blobs() {
     if (this.cache.blobs !== undefined) {
       return this.cache.blobs;
     }
-    const blobs = this.state._root.tree
-      .filter(node => node.type === 'blob' && !isDotFile(node.path))
-      .sort((a, b) => basename(a.path).localeCompare(basename(b.path)));
+    const blobs = Object.fromEntries(this.state._root.tree
+      .filter(node => node.type === 'blob')
+      .sort((a, b) => basename(a.path).localeCompare(basename(b.path)))
+      .map(o => [o.path, o]));
     this.cache.blobs = blobs;
     return blobs;
   }
@@ -115,9 +123,10 @@ class App extends Component {
       return [];
     }
     const cat = this.parentCategory;
-    return this.blobs
-      .filter(node => dirname(node.path) === cat)
-      .map(node => basename(node.path));
+    return Object
+      .entries(this.blobs)
+      .filter(([path, _node]) => dirname(path) === cat)
+      .map(([path, node]) => basename(path));
   }
 
   /**
@@ -128,23 +137,25 @@ class App extends Component {
       return [];
     }
     const cat = this.parentCategory;
-    return this.trees
-      .filter(node => dirname(node.path) === cat)
-      .map(node => basename(node.path));
+    return Object
+      .entries(this.trees)
+      .filter(([path, _node]) => dirname(path) === cat)
+      .map(([path, _node]) => basename(path));
   }
 
   /**
    * @return {string[]}
    */
   get posts() {
-    const maybeCache = this.cache.posts[this.state.category];
+    const cat = this.state.category;
+    const maybeCache = this.cache.posts[cat];
     if (maybeCache !== undefined) {
       return maybeCache;
     }
-    const posts = this.blobs
-      .filter(node => dirname(node.path) === this.state.category)
-      .map(node => basename(node.path));
-    this.cache.posts[this.state.category] = posts;
+    const posts = Object.entries(this.blobs)
+      .filter(([path, _node]) => dirname(path) === cat)
+      .map(([path, _node]) => basename(path));
+    this.cache.posts[cat] = posts;
     return posts;
   }
 
@@ -152,14 +163,16 @@ class App extends Component {
    * @return {string[]}
    */
   get categories() {
-    const maybeCache = this.cache.categories[this.state.category];
+    const cat = this.state.category;
+    const maybeCache = this.cache.categories[cat];
     if (maybeCache !== undefined) {
       return maybeCache;
     }
-    const categories = this.trees
-      .filter(node => dirname(node.path) === this.state.category)
-      .map(node => basename(node.path));
-    this.cache.categories[this.state.category] = categories;
+    const categories = Object
+      .entries(this.trees)
+      .filter(([path, _node]) => dirname(path) === cat)
+      .map(([path, _node]) => basename(path));
+    this.cache.categories[cat] = categories;
     return categories;
   }
 
@@ -177,7 +190,7 @@ class App extends Component {
       post: basename(post),
       postText: '',
     });
-    const postBlob = this.blobs.find(node => node.path === post);
+    const postBlob = this.blobs[post];
     if (!postBlob) {
       console.warn(`could not find blob for post ${post}`);
       return;
