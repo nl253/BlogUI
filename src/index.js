@@ -78,7 +78,7 @@ class App extends Component {
   }
 
   /**
-   * @return {Record<string, {path: string, url: string, sha: string}>}
+   * @return {Object<{path: string, url: string, sha: string}>}
    */
   get trees() {
     if (this.cache.trees !== undefined) {
@@ -94,7 +94,7 @@ class App extends Component {
   }
 
   /**
-   * @return {Record<string, {path: string, url: string, sha: string}>}
+   * @return {Object<{path: string, url: string, sha: string}>}
    */
   get blobs() {
     if (this.cache.blobs !== undefined) {
@@ -124,9 +124,9 @@ class App extends Component {
     }
     const cat = this.parentCategory;
     return Object
-      .entries(this.blobs)
-      .filter(([path, _node]) => dirname(path) === cat)
-      .map(([path, node]) => basename(path));
+      .values(this.blobs)
+      .filter(node => dirname(node.path) === cat)
+      .map(node => basename(node.path));
   }
 
   /**
@@ -138,9 +138,9 @@ class App extends Component {
     }
     const cat = this.parentCategory;
     return Object
-      .entries(this.trees)
-      .filter(([path, _node]) => dirname(path) === cat)
-      .map(([path, _node]) => basename(path));
+      .values(this.trees)
+      .filter(node => dirname(node.path) === cat)
+      .map(node => basename(node.path));
   }
 
   /**
@@ -313,15 +313,15 @@ class App extends Component {
    * @param {string} category
    */
   absCategory(category) {
-    if (this.state.category === category) {
-      return;
-    } else if (category === '') {
-      this.absCategory('/');
-    } else if (category.length > 1 && category.endsWith('/')) {
-      this.absCategory(category.replace(/\/$/, ''));
-    } else {
-      window.history.pushState(undefined, `category ${basename(category)}`, category);
-      this.setState({ category });
+    if (this.state.category !== category) {
+      if (category === '') {
+        this.absCategory('/');
+      } else if (category.length > 1 && category.endsWith('/')) {
+        this.absCategory(category.replace(/\/$/, ''));
+      } else {
+        window.history.pushState(undefined, `category ${basename(category)}`, category);
+        this.setState({ category });
+      }
     }
   }
 
