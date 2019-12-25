@@ -23,7 +23,6 @@ const CACHE = {
   sentiment: {},
 };
 
-
 /**
  * @return {Promise<{tree: Record<string, *>}|null>}
  */
@@ -58,40 +57,13 @@ const getBlogData = async () => {
   return result;
 };
 
-const mdToHtml = async (md) => {
-  if (RUNNING_REQUESTS.mdToHtml !== undefined) {
-    RUNNING_REQUESTS.mdToHtml.abort();
-  }
-  const controller = new AbortController();
-  let result = null;
-  try {
-    RUNNING_REQUESTS.mdToHtml = controller;
-    const res = await fetch(
-      `${process.env.REACT_APP_NLP_API_ROOT}/mdToHtml`,
-      {
-        mode: 'cors',
-        signal: controller.signal,
-        body: md,
-        method: 'post',
-        headers: {
-          Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
-          Accept: 'text/html, text/plain, *',
-          'Content-Type': 'text/plain',
-        },
-      });
-    if (!res.ok) {
-      throw new Error(JSON.stringify(res.body));
-    }
-    result = await res.text();
-  } catch (e) {
-    console.error(e);
-  } finally {
-    delete RUNNING_REQUESTS.mdToHtml;
-  }
-  return result;
-};
-
 const mdToHtmlLocally = async (md) => parser(lexer(md));
+
+/**
+ * @param {*[]} xs
+ * @return {*[]}
+ */
+const unique = xs => [...new Set(xs)];
 
 /**
  * @param {string} post
@@ -113,12 +85,12 @@ const callCompromiseApi = async (post, category, postText, type) => {
     RUNNING_REQUESTS[type] = controller;
     try {
       const res = await fetch(
-        `${process.env.REACT_APP_NLP_API_ROOT}/compromise`,
+        `${process.env.REACT_APP_NLP_API_ROOT}/${type}`,
         {
+          method: 'post',
           mode: 'cors',
           signal: controller.signal,
-          body: JSON.stringify({text: postText, type}),
-          method: 'post',
+          body: postText,
           headers: {
             Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
             Accept: 'application/json, *',
@@ -129,11 +101,9 @@ const callCompromiseApi = async (post, category, postText, type) => {
         throw new Error(JSON.stringify(res.body));
       }
       const json = await res.json();
-      const newValue = [
-        ...(new Set(json.filter(
-          w => w.length > 2 && w.search(/^[a-z 0-9.,&]+$/i) >= 0)))];
-      CACHE[type][postPath] = newValue;
-      result = newValue;
+      const regex = /^[a-z 0-9.,&]{2,}$/i;
+      result = unique(json.filter(w => w.search(regex) >= 0));
+      CACHE[type][postPath] = result;
     } catch (e) {
       CACHE[type][postPath] = null;
       console.error(e);
@@ -178,7 +148,7 @@ const callNaturalApi = async (post, category, postText, action) => {
       if (!res.ok) {
         throw new Error(JSON.stringify(res.body));
       }
-      const result = await res.json();
+      result = await res.json();
       CACHE[action][postPath] = result;
     } catch (e) {
       console.error(e);
@@ -203,21 +173,18 @@ const define = async (word) => {
     const controller = new AbortController();
     RUNNING_REQUESTS.definition = controller;
     try {
-      const res = await fetch(`${process.env.REACT_APP_NLP_API_ROOT}/lookup`, {
+      const res = await fetch(`${process.env.REACT_APP_NLP_API_ROOT}/define/${word}`, {
         mode: 'cors',
         signal: controller.signal,
-        body: JSON.stringify({word}),
-        method: 'post',
         headers: {
           Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
-          Accept: 'application/json, *',
-          'Content-Type': 'application/json',
+          Accept: 'text/plain, *',
         }
       });
       if (!res.ok) {
         throw new Error(JSON.stringify(res.body));
       }
-      result = (await res.json()).definition;
+      result = await res.text();
       CACHE.definitions[word] = result;
     } catch (e) {
       console.error(e.message);
@@ -258,9 +225,8 @@ const getPostHTML = async (sha) => {
       const markdown = json.encoding === 'base64'
         ? atob(json.content)
         : json.content;
-      const postText = await mdToHtmlLocally(markdown);
-      CACHE.postText[sha] = postText;
-      result = postText;
+      result = await mdToHtmlLocally(markdown);
+      CACHE.postText[sha] = result;
     } catch (e) {
       console.error(e);
     } finally {
@@ -274,7 +240,6 @@ const getPostHTML = async (sha) => {
 
 export {
   getBlogData,
-  mdToHtml,
   callCompromiseApi,
   callNaturalApi,
   define,
