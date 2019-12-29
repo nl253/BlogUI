@@ -60,8 +60,8 @@ const getBlogData = async () => {
 const mdToHtmlLocally = (md) => parser(lexer(md));
 
 /**
- * @param {*[]} xs
- * @returns {*[]}
+ * @param {Array<*>} xs
+ * @returns {Array<*>}
  */
 const unique = (xs) => [...new Set(xs)];
 
