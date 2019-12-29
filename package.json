@@ -1,51 +1,42 @@
 {
   "name": "blog_ui",
   "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "react-scripts": "3.3.0",
-    "node-sass": "^4.11.0",
-    "reactstrap": "^8.2.0",
-    "bootstrap": "^4.2.1",
-    "marked": "^0.8.0",
-    "path-browserify": "^1.0.0",
-    "react": "^16.7.0",
-    "react-dom": "^16.7.0"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
+  "description": "Blog UI",
   "readme": "https://github.com/nl253/BlogUI/blob/master/README.md",
+  "homepage": "https://blog-nl.herokuapp.com",
   "keywords": [
     "blog",
     "ui",
     "react"
   ],
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/nl253/BlogUI"
   },
-  "homepage": "https://blog-nl.herokuapp.com",
-  "engineStrict": true,
   "bugs": {
     "email": "norbertlogiewa96@gmail.com",
     "url": "https://github.com/nl253/BlogUI/issues"
   },
-  "author": {
-    "email": "norbertlogiewa96@gmail.com",
-    "name": "Norber Logiewa",
-    "url": "https://github.com/nl253"
-  },
+  "author": "Norbert Logiewa <norbertlogiewa96@gmail.com>",
+  "maintainers": [
+    {
+      "email": "norbertlogiewa96@gmail.com",
+      "name": "Norbert Logiewa"
+    }
+  ],
+  "contributors": [
+    {
+      "email": "norbertlogiewa96@gmail.com",
+      "name": "Norber Logiewa",
+      "url": "https://github.com/nl253"
+    }
+  ],
   "engines": {
     "node": ">= 10.15.1",
     "npm": ">= 6.4.1"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
+  "engineStrict": true,
   "browserslist": {
     "production": [
       ">0.2%",
@@ -57,5 +48,67 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "dependencies": {
+    "marked": "^0.8.0",
+    "react-scripts": "3.3.0",
+    "node-sass": "^4.11.0",
+    "reactstrap": "^8.2.0",
+    "bootstrap": "^4.2.1",
+    "path-browserify": "^1.0.0",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.7.1",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-plugin-compat": "^3.3.0",
+    "eslint-plugin-filenames": "^1.3.2",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-optimize-regex": "^1.1.7",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.17.0",
+    "eslint-plugin-security": "^1.4.0",
+    "jsdoc": "3.6.3",
+    "jsonlint": "^1.6.3",
+    "license-checker": "^25.0.1",
+    "markdownlint": "^0.17.2",
+    "markdownlint-cli": "^0.19.0",
+    "remark": "^11.0.2",
+    "remark-cli": "^7.0.1",
+    "remark-lint": "^6.0.5",
+    "remark-preset-lint-consistent": "^2.0.3",
+    "remark-preset-lint-markdown-style-guide": "^2.1.3",
+    "remark-preset-lint-recommended": "^3.0.3",
+    "retire": "^2.0.3",
+    "write-good": "^1.0.2"
+  },
+  "private": true,
+  "remarkConfig": {
+    "plugins": [
+      "remark-preset-lint-recommended",
+      "remark-preset-lint-markdown-style-guide",
+      "remark-preset-lint-consistent"
+    ]
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "doc": "bash -c \"echo -e 'GENERATING DOCS\\n' && rm -rf ./docs && npx jsdoc --pedantic -d ./docs -R ./README.md ./src/*.js\"",
+    "doc:open": "bash -c \"npm run doc && $BROWSER ./docs/index.html\"",
+    "doc:publish": "bash -c \"echo -e 'PUBLISHING DOCS\\n' && npm run doc && git add -f ./docs && git commit -am 'Update docs' -n && git push\"",
+    "lint": "bash -c \"npm run lint:code && npm run lint:doc && npm run lint:deps\"",
+    "lint:code": "bash -c \"npx eslint ./src/*.js\"",
+    "lint:doc": "bash -c \"npm run lint:doc:markdown-lint && npm run lint:doc:write-good && npm run lint:doc:remark\"",
+    "lint:doc:write-good": "bash -c \"npx write-good --so --weasel --tooWordy --cliches --thereIs *.md || echo ''\"",
+    "lint:doc:markdown-lint": "bash -c \"npx markdownlint README.md\"",
+    "lint:doc:remark": "bash -c \"npx remark -u lint *.md\"",
+    "lint:deps": "bash -c \"npm run lint:deps:license && npm run lint:deps:security\"",
+    "lint:deps:security": "npx retire --js",
+    "lint:deps:license": "npx license-checker --summary",
+    "loc": "bash -c \"tokei -- $(git ls-files | grep -v docs | grep -v bin)\""
   }
 }

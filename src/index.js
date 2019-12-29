@@ -1,27 +1,27 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 
-import {Spinner, Toast, ToastBody, ToastHeader} from 'reactstrap';
-import {basename, dirname, join} from 'path-browserify';
+import { Spinner, Toast, ToastBody, ToastHeader } from 'reactstrap';
+import { basename, dirname, join } from 'path-browserify';
 import { author } from '../package.json';
 
 import './index.scss';
 import bannedWords from './bannedWords.json';
 import * as serviceWorker from './serviceWorker';
 import {
-  findAllMatches,
   countSent,
   countWords,
+  findAllMatches,
   fmtHeading,
   getTimeToReadInMin,
   isFile,
 } from './utils';
 import {
-  define,
-  getPostHTML,
   callCompromiseApi,
   callNaturalApi,
+  define,
   getBlogData,
+  getPostHTML,
 } from './api';
 
 
@@ -33,10 +33,7 @@ class App extends Component {
     this.year = new Date(Date.now()).getFullYear().toString();
     this.naturalApiRequests = ['sentiment'];
     this.compromiseApiRequests = [
-      'places',
-      'organizations',
-      'topics',
-      'people',
+      'places', 'organizations', 'topics', 'people',
     ];
     this.cache = {
       categories: {},
@@ -52,8 +49,8 @@ class App extends Component {
       post: null,
       postText: '',
       _loading: ['_root'],
-      ...Object.fromEntries(this.naturalApiRequests.map(e => [e, null])),
-      ...Object.fromEntries(this.compromiseApiRequests.map(e => [e, []])),
+      ...Object.fromEntries(this.naturalApiRequests.map((e) => [e, null])),
+      ...Object.fromEntries(this.compromiseApiRequests.map((e) => [e, []])),
     };
     this.init();
   }
@@ -76,7 +73,7 @@ class App extends Component {
   }
 
   /**
-   * @return {Object<{path: string, url: string, sha: string}>}
+   * @returns {Object<{path: string, url: string, sha: string}>}
    */
   get trees() {
     if (this.cache.trees !== undefined) {
@@ -84,37 +81,39 @@ class App extends Component {
     }
     const trees = Object.fromEntries(
       this.state._root.tree
-        .filter(node => node.type === 'tree')
+        .filter((node) => node.type === 'tree')
         .sort((a, b) => basename(a.path).localeCompare(basename(b.path)))
-        .map(node => ([node.path, node])));
+        .map((node) => ([node.path, node]))
+    );
     this.cache.trees = trees;
     return trees;
   }
 
   /**
-   * @return {Object<{path: string, url: string, sha: string}>}
+   * @returns {Object<{path: string, url: string, sha: string}>}
    */
   get blobs() {
     if (this.cache.blobs !== undefined) {
       return this.cache.blobs;
     }
     const blobs = Object.fromEntries(this.state._root.tree
-      .filter(node => node.type === 'blob')
+      .filter((node) => node.type === 'blob')
       .sort((a, b) => basename(a.path).localeCompare(basename(b.path)))
-      .map(o => [o.path, o]));
+      .map((o) => [o.path, o]));
     this.cache.blobs = blobs;
     return blobs;
   }
 
   /**
-   * @return {string}
+   * @returns {string}
    */
   get parentCategory() {
-    return this.state.category === '/' ? '/' : dirname(this.state.category);
+    const { category } = this.state;
+    return category === '/' ? '/' : dirname(category);
   }
 
   /**
-   * @return {string[]}
+   * @returns {string[]}
    */
   get parentPosts() {
     if (this.state.category === '/') {
@@ -123,12 +122,12 @@ class App extends Component {
     const cat = this.parentCategory;
     return Object
       .values(this.blobs)
-      .filter(node => dirname(node.path) === cat)
-      .map(node => basename(node.path));
+      .filter((node) => dirname(node.path) === cat)
+      .map((node) => basename(node.path));
   }
 
   /**
-   * @return {string[]}
+   * @returns {string[]}
    */
   get parentCategories() {
     if (this.state.category === '/') {
@@ -137,12 +136,12 @@ class App extends Component {
     const cat = this.parentCategory;
     return Object
       .values(this.trees)
-      .filter(node => dirname(node.path) === cat)
-      .map(node => basename(node.path));
+      .filter((node) => dirname(node.path) === cat)
+      .map((node) => basename(node.path));
   }
 
   /**
-   * @return {string[]}
+   * @returns {string[]}
    */
   get posts() {
     const cat = this.state.category;
@@ -158,7 +157,7 @@ class App extends Component {
   }
 
   /**
-   * @return {string[]}
+   * @returns {string[]}
    */
   get categories() {
     const cat = this.state.category;
@@ -195,22 +194,24 @@ class App extends Component {
     }
     try {
       const postText = await getPostHTML(postBlob.sha);
-      this.setState({postText});
+      this.setState({ postText });
       this.endLoading('postText');
       if (this.state.postText) {
         const p = Promise.all([
           ...this.naturalApiRequests.map(async (type) => {
-            this.setState({[type]: null});
+            this.setState({ [type]: null });
             this.beginLoading(type);
             this.setState({
+              // eslint-disable-next-line react/no-access-state-in-setstate
               [type]: await callNaturalApi(this.state.post, this.state.category, this.getPostBody(), type),
             });
             this.endLoading(type);
           }),
           ...this.compromiseApiRequests.map(async (type) => {
-            this.setState({[type]: []});
+            this.setState({ [type]: [] });
             this.beginLoading(type);
             this.setState({
+              // eslint-disable-next-line react/no-access-state-in-setstate
               [type]: await callCompromiseApi(this.state.post, this.state.category, this.getPostBody(), type),
             });
             this.endLoading(type);
@@ -234,10 +235,10 @@ class App extends Component {
     for (const n of nodes) {
       for (const child of n.childNodes) {
         if (child.nodeName === '#text') {
-          const matches = findAllMatches(child.nodeValue, /([a-zA-Z]{2,})/g);
+          const matches = findAllMatches(child.nodeValue, /([A-Za-z]{2,})/g);
           for (const w of new Set(matches)) {
             if (!this.bannedWords.has(w)) {
-              n.innerHTML = n.innerHTML.replace(new RegExp('\\b' + w + '\\b', 'g'), `<button class="word">${w}</button>`);
+              n.innerHTML = n.innerHTML.replace(new RegExp(`\\b${w}\\b`, 'g'), `<button class="word">${w}</button>`);
             }
           }
         }
@@ -281,7 +282,7 @@ class App extends Component {
    * @param {string} what
    */
   beginLoading(what) {
-    this.setState({_loading: [...this.state._loading, what]});
+    this.setState(({ _loading }) => ({ _loading: [..._loading, what] }));
   }
 
   /**
@@ -301,7 +302,7 @@ class App extends Component {
 
   /**
    * @param {string} item
-   * @return {boolean}
+   * @returns {boolean}
    */
   didLoad(...item) {
     return item.reduce((prev, focus) => prev && this.state._loading.indexOf(focus) < 0, true);
@@ -324,10 +325,10 @@ class App extends Component {
   }
 
   /**
-   * @return {string}
+   * @returns {string}
    */
   getPostBody(slice = true) {
-    const s = [...document.getElementById('post-text').querySelectorAll('p')].map(p => p.innerText).join('\n');
+    const s = [...document.getElementById('post-text').querySelectorAll('p')].map((p) => p.innerText).join('\n');
     return slice ? s.slice(0, 10000) : s;
   }
 
@@ -335,197 +336,227 @@ class App extends Component {
    * @returns {*}
    */
   render() {
+    const { definition, category, post, word, postText } = this.state;
     return (
-      this.didLoad('_root') &&
-      <div>
-        <Toast isOpen={!!this.state.definition}
-               className="d-sm-none d-md-none d-lg-block d-xl-block"
-               style={{position: 'fixed', zIndex: 99, bottom: '10px', left: '10px'}}
-               transition={{exit: false, timeout: 10, enter: true, appear: true}}
-               onClick={() => this.setState({word: null, definition: null})}>
-          <ToastHeader>{this.state.word}</ToastHeader>
-          <ToastBody>{this.state.definition}</ToastBody>
-        </Toast>
-        <main className="container-fluid mt-0 mt-xl-5 mt-lg-5 mt-md-0 mt-sm-0 d-flex no-gutters flex-column flex-xl-row flex-lg-row flex-md-row flex-sm-column" style={{minHeight: '84vh'}}>
-          <section className="col-xl-2 col-lg-2 d-none d-xl-block d-lg-block d-md-none d-sm-none">
-            {this.parentCategories.length > 0 && (
-              this.parentCategory.length === 1 ?
-                (
-                  <div>
-                    <h1 className="text-center mx-auto display-4">Blog</h1>
-                    <hr style={{maxWidth: '75%'}}/>
-                  </div>
-                ) : (
-                  <div>
-                    <h2 className="text-center mx-auto">
-                      {fmtHeading(basename(this.parentCategory))}
-                    </h2>
-                    <hr/>
-                  </div>
-                )
-            )}
-            {this.parentCategories.length > 0 && (
-              <nav>
-                {this.parentCategories.map((c, idx) =>
-                  <button onClick={() => this.absCategory(join(this.parentCategory, c))}
-                          key={idx}
-                          className={`d-block btn mx-auto w-75 btn-${this.state.category.substr(1) === c ? 'warning' : 'link'}`}>
-                    {fmtHeading(c)}
-                  </button>
-                )}
-              </nav>
-            )}
-            {this.parentPosts.length > 0 && (
-              <div>
-                {this.parentCategories.length > 0 && <hr style={{maxWidth: '75%'}}/>}
-                <h3 className="text-center mt-3 mx-auto">Posts</h3>
+      this.didLoad('_root')
+      && (
+        <div>
+          <Toast
+            isOpen={!!definition}
+            className="d-sm-none d-md-none d-lg-block d-xl-block"
+            style={{ position: 'fixed', zIndex: 99, bottom: '10px', left: '10px' }}
+            transition={{ exit: false, timeout: 10, enter: true, appear: true }}
+            onClick={() => this.setState({ word: null, definition: null })}
+          >
+            <ToastHeader>{word}</ToastHeader>
+            <ToastBody>{definition}</ToastBody>
+          </Toast>
+          <main className="container-fluid mt-0 mt-xl-5 mt-lg-5 mt-md-0 mt-sm-0 d-flex no-gutters flex-column flex-xl-row flex-lg-row flex-md-row flex-sm-column" style={{ minHeight: '84vh' }}>
+            <section className="col-xl-2 col-lg-2 d-none d-xl-block d-lg-block d-md-none d-sm-none">
+              {this.parentCategories.length > 0 && (
+                this.parentCategory.length === 1
+                  ? (
+                    <div>
+                      <h1 className="text-center mx-auto display-4">Blog</h1>
+                      <hr style={{ maxWidth: '75%' }} />
+                    </div>
+                  ) : (
+                    <div>
+                      <h2 className="text-center mx-auto">
+                        {fmtHeading(basename(this.parentCategory))}
+                      </h2>
+                      <hr />
+                    </div>
+                  )
+              )}
+              {this.parentCategories.length > 0 && (
                 <nav>
-                  {this.parentPosts.map((post, idx) =>
-                    <button onClick={() => this.absPost(join(this.parentCategory, post))}
-                            key={idx}
-                            className={`d-block btn mx-auto w-75 btn-${this.state.post === post ? 'light' : 'link'}`}>
-                      {fmtHeading(post)}
-                    </button>
-                  )}
-                </nav>
-              </div>
-            )}
-          </section>
-          <section className="col-xl-2 col-lg-2 col-md-3 col-sm-12 my-4 my-xl-0 my-lg-0 my-md-4 my-sm-4">
-            <div className="text-center col mx-auto">
-              {this.state.category === '/'
-                ?
-                (
-                  <div>
-                    <h1 className="text-center mx-auto display-4">Blog</h1>
-                    <hr style={{maxWidth: '75%'}}/>
-                  </div>
-                )
-                : (
-                  <div>
-                    <h2>{fmtHeading(basename(this.state.category))}</h2>
-                    <button className="btn btn-light d-block w-50 mx-auto border"
-                            onClick={() => this.absCategory(this.parentCategory)}>
-                      Back
-                    </button>
-                  </div>
-                )
-              }
-            </div>
-            <div>
-              {this.categories.length > 0 && (
-                <nav>
-                  {this.categories.map((c, idx) =>
-                    <button onClick={() => this.absCategory(join(this.state.category, c))}
-                            key={idx}
-                            className='d-block btn mx-auto w-75 btn-link'>
+                  {this.parentCategories.map((c, idx) => (
+                    <button
+                      type="button"
+                      onClick={() => this.absCategory(join(this.parentCategory, c))}
+                      key={idx}
+                      className={`d-block btn mx-auto w-75 btn-${category.substr(1) === c ? 'warning' : 'link'}`}
+                    >
                       {fmtHeading(c)}
                     </button>
-                  )}
+                  ))}
                 </nav>
               )}
-              {this.posts.length > 0 && (
+              {this.parentPosts.length > 0 && (
                 <div>
-                  {this.categories.length > 0 && <hr style={{maxWidth: '75%'}}/>}
+                  {this.parentCategories.length > 0 && <hr style={{ maxWidth: '75%' }} />}
                   <h3 className="text-center mt-3 mx-auto">Posts</h3>
                   <nav>
-                    {this.posts.map((post, idx) =>
-                      <button onClick={() => this.absPost(join(this.state.category, post))}
-                              key={idx}
-                              className={`d-block btn w-75 mx-auto btn-${this.state.post === post ? 'warning' : 'link'}`}>
-                        {fmtHeading(post)}
+                    {this.parentPosts.map((p, idx) => (
+                      <button
+                        type="button"
+                        onClick={() => this.absPost(join(this.parentCategory, p))}
+                        key={idx}
+                        className={`d-block btn mx-auto w-75 btn-${post === p ? 'light' : 'link'}`}
+                      >
+                        {fmtHeading(p)}
                       </button>
-                    )}
+                    ))}
                   </nav>
                 </div>
               )}
-            </div>
-          </section>
-          {this.didLoad('postText') && this.state.postText && (
-            <section className="col-xl col-lg col-md-9 col-sm-12 container-fluid row justify-content-around">
-              <div className={`col-xl-3 col-lg-3 d-md-none d-sm-none`}/>
-              <section className={`col-xl-6 col-8-lg col-12-md col-12-sm`}>
-                <div id="post-text"
-                     dangerouslySetInnerHTML={{__html: this.state.postText}}
-                     className="my-4 my-xl-0 my-lg-0 my-md-4 my-sm-4"/>
-              </section>
-              <div className={`col-xl-1 col-lg-1 d-md-none d-sm-none`}/>
-
-              <section className={`col-xl-1 col-lg-1 d-none d-xl-block d-lg-block d-md-none d-sm-none`}>
-                <h3>Info</h3>
-                <p className="mb-1">{getTimeToReadInMin(this.state.postText)} min read</p>
-                <p className="mb-1">{countWords(this.state.postText)} words</p>
-                <p>{countSent(this.state.postText)} sentences</p>
-                <div>
-                  {this.compromiseApiRequests
-                    .filter(type => !!this.state[type] && this.state[type].length > 0)
-                    .map((type, typeIdx) => (
-                      <div key={typeIdx}>
-                        <h4>{type.substr(0, 1).toUpperCase()}{type.substr(1)}</h4>
-                        <ul style={{listStyleType: 'none', padding: 0, margin: 0}}>
-                          {this.state[type].map((t, tIdx) => (
-                            <li key={tIdx}>
-                              <p style={{fontVariantCaps: 'all-petite-caps'}}>{t}</p>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>))}
-
-                  {this.naturalApiRequests
-                    .filter(type => !!this.state[type])
-                    .map((type, typeIdx) => (
-                      <div key={typeIdx}>
-                        <h4>{type.substr(0, 1).toUpperCase()}{type.substr(1)}</h4>
-                        <p style={{fontVariantCaps: 'all-petite-caps'}}>{this.state[type].toFixed(2)}</p>
-                      </div>))}
-                </div>
-              </section>
-              <div className={`col-xl-1 col-lg-1 d-md-none d-sm-none`}/>
             </section>
-          )}
-          {!this.didLoad('postText') && (
-            <div className="mx-auto my-auto">
-              <Spinner style={{ width: '3rem', height: '3rem' }} />
-            </div>
-          )}
-        </main>
-        <footer className="py-4 bg-light d-none d-xl-block d-lg-block d-md-block d-sm-block border-top mt-xl-3 mt-1 mt-lg-3 mt-md-1 mt-sm-1">
-          <div className="mx-auto mt-2 mb-4" style={{maxWidth: '370px'}}>
+            <section className="col-xl-2 col-lg-2 col-md-3 col-sm-12 my-4 my-xl-0 my-lg-0 my-md-4 my-sm-4">
+              <div className="text-center col mx-auto">
+                {category === '/'
+                  ? (
+                    <div>
+                      <h1 className="text-center mx-auto display-4">Blog</h1>
+                      <hr style={{ maxWidth: '75%' }} />
+                    </div>
+                  )
+                  : (
+                    <div>
+                      <h2>{fmtHeading(basename(category))}</h2>
+                      <button
+                        type="button"
+                        className="btn btn-light d-block w-50 mx-auto border"
+                        onClick={() => this.absCategory(this.parentCategory)}
+                      >
+                      Back
+                      </button>
+                    </div>
+                  )}
+              </div>
+              <div>
+                {this.categories.length > 0 && (
+                  <nav>
+                    {this.categories.map((c, idx) => (
+                      <button
+                        type="button"
+                        onClick={() => this.absCategory(join(category, c))}
+                        key={idx}
+                        className="d-block btn mx-auto w-75 btn-link"
+                      >
+                        {fmtHeading(c)}
+                      </button>
+                    ))}
+                  </nav>
+                )}
+                {this.posts.length > 0 && (
+                  <div>
+                    {this.categories.length > 0 && <hr style={{ maxWidth: '75%' }} />}
+                    <h3 className="text-center mt-3 mx-auto">Posts</h3>
+                    <nav>
+                      {this.posts.map((p, idx) => (
+                        <button
+                          type="button"
+                          onClick={() => this.absPost(join(category, p))}
+                          key={idx}
+                          className={`d-block btn w-75 mx-auto btn-${post === p ? 'warning' : 'link'}`}
+                        >
+                          {fmtHeading(p)}
+                        </button>
+                      ))}
+                    </nav>
+                  </div>
+                )}
+              </div>
+            </section>
+            {this.didLoad('postText') && postText && (
+              <section className="col-xl col-lg col-md-9 col-sm-12 container-fluid row justify-content-around">
+                <div className="col-xl-3 col-lg-3 d-md-none d-sm-none" />
+                <section className="col-xl-6 col-8-lg col-12-md col-12-sm">
+                  <div
+                    id="post-text"
+                    dangerouslySetInnerHTML={{ __html: postText }}
+                    className="my-4 my-xl-0 my-lg-0 my-md-4 my-sm-4"
+                  />
+                </section>
+                <div className="col-xl-1 col-lg-1 d-md-none d-sm-none" />
+
+                <section className="col-xl-1 col-lg-1 d-none d-xl-block d-lg-block d-md-none d-sm-none">
+                  <h3>Info</h3>
+                  <p className="mb-1">{getTimeToReadInMin(postText)} min read</p>
+                  <p className="mb-1">{countWords(postText)} words</p>
+                  <p>{countSent(postText)} sentences</p>
+                  <div>
+                    {this.compromiseApiRequests
+                      .filter((type) => !!this.state[type] && this.state[type].length > 0)
+                      .map((type, typeIdx) => (
+                        <div key={typeIdx}>
+                          <h4>{type.substr(0, 1).toUpperCase()}{type.substr(1)}</h4>
+                          <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+                            {this.state[type].map((t, tIdx) => (
+                              <li key={tIdx}>
+                                <p style={{ fontVariantCaps: 'all-petite-caps' }}>{t}</p>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+
+                    {this.naturalApiRequests
+                      .filter((type) => !!this.state[type])
+                      .map((type, typeIdx) => (
+                        <div key={typeIdx}>
+                          <h4>{type.substr(0, 1).toUpperCase()}{type.substr(1)}</h4>
+                          <p style={{ fontVariantCaps: 'all-petite-caps' }}>{this.state[type].toFixed(2)}</p>
+                        </div>
+                      ))}
+                  </div>
+                </section>
+                <div className="col-xl-1 col-lg-1 d-md-none d-sm-none" />
+              </section>
+            )}
+            {!this.didLoad('postText') && (
+              <div className="mx-auto my-auto">
+                <Spinner style={{ width: '3rem', height: '3rem' }} />
+              </div>
+            )}
+          </main>
+          <footer className="py-4 bg-light d-none d-xl-block d-lg-block d-md-block d-sm-block border-top mt-xl-3 mt-1 mt-lg-3 mt-md-1 mt-sm-1">
+            <div className="mx-auto mt-2 mb-4" style={{ maxWidth: '370px' }}>
               <span className="mr-3">
-                <a href="https://www.linkedin.com/in/norbert-logiewa"
-                   className="btn btn-sm btn-secondary"
-                   style={{minWidth: '80px'}}>
+                <a
+                  href="https://www.linkedin.com/in/norbert-logiewa"
+                  className="btn btn-sm btn-secondary"
+                  style={{ minWidth: '80px' }}
+                >
                   LinkedIn
                 </a>
               </span>
-            <span className="mr-3">
-                <a href="https://github.com/nl253"
-                   className="btn btn-sm btn-secondary"
-                   style={{minWidth: '80px'}}>
+              <span className="mr-3">
+                <a
+                  href="https://github.com/nl253"
+                  className="btn btn-sm btn-secondary"
+                  style={{ minWidth: '80px' }}
+                >
                   GitHub
                 </a>
               </span>
-            <span className="mr-3">
-                <a href="https://docs.google.com/document/d/1I94ZHc_75a2ivyjcDXjESIrGYPmJUriTm3xmEkcwaeI/edit?usp=sharing"
-                   className="btn btn-sm btn-secondary"
-                   style={{minWidth: '80px'}}>
+              <span className="mr-3">
+                <a
+                  href="https://docs.google.com/document/d/1I94ZHc_75a2ivyjcDXjESIrGYPmJUriTm3xmEkcwaeI/edit?usp=sharing"
+                  className="btn btn-sm btn-secondary"
+                  style={{ minWidth: '80px' }}
+                >
                   CV
                 </a>
               </span>
-            <span>
-                <a href="https://portfolio-nl.herokuapp.com"
-                   className="btn btn-sm btn-secondary"
-                   style={{minWidth: '80px'}}>
+              <span>
+                <a
+                  href="https://portfolio-nl.herokuapp.com"
+                  className="btn btn-sm btn-secondary"
+                  style={{ minWidth: '80px' }}
+                >
                   Portfolio
                 </a>
               </span>
-          </div>
-          <p className="text-center mx-auto">Copyright &copy; {this.author.name} {this.year}</p>
-        </footer>
-      </div>
+            </div>
+            <p className="text-center mx-auto">Copyright &copy; {this.author.name} {this.year}</p>
+          </footer>
+        </div>
+      )
     );
   }
 }
 
-ReactDOM.render(<App/>, document.getElementById('root'));
+ReactDOM.render(<App />, document.getElementById('root'));
 serviceWorker.unregister();
