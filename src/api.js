@@ -128,9 +128,9 @@ const callCompromiseApi = async (post, category, postText, type) => {
       if (!res.ok) {
         throw new Error(JSON.stringify(res.body));
       }
-      const json = await res.json();
+      const words = await res.json();
       const regex = /^[\d &,.a-z]{2,}$/i;
-      result = unique(json.filter((w) => w.search(regex) >= 0));
+      result = unique(words.filter((w) => w.split(/\s+/g).reduce((ok, w) => ok && w.search(regex) >= 0, true)));
       CACHE[type][postPath] = result;
     } catch (e) {
       CACHE[type][postPath] = null;
