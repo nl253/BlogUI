@@ -2,7 +2,12 @@ import React from 'react';
 import { join } from 'path-browserify';
 import { fmtHeading } from './utils';
 
-export default ({ absCategory, category, parentCategories, parentCategory }) => (
+export default ({
+  absCategory,
+  category,
+  parentCategories,
+  parentCategory,
+}) => (
   <nav hidden={parentCategories.length === 0}>
     {parentCategories.map((c) => (
       <button

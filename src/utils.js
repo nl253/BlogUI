@@ -13,7 +13,7 @@ const REGEX_HEADING_DELIM = /[-_]/g;
 const fmtHeading = (heading) => heading
   .replace(REGEX_HEADING_DELIM, ' ')
   .split(' ')
-  .map((word) => word.length < 3 ? word : word[0].toUpperCase() + word.slice(1))
+  .map((word) => (word.length < 3 ? word : word[0].toUpperCase() + word.slice(1)))
   .join(' ')
   .replace(REGEX_FILE_END, '');
 

@@ -55,7 +55,7 @@ const getBlogData = async () => {
       headers: {
         Accept: 'application/json, *',
         Authorization: process.env.REACT_APP_AUTHORIZATION,
-      }
+      },
     });
     if (!res.ok) {
       throw new Error(JSON.stringify(res.body));
@@ -67,13 +67,18 @@ const getBlogData = async () => {
         tree
           .filter((n) => n.type === 'tree' && basename(n.path).indexOf('.') < 0)
           .map(({ url, mode, ...rest }) => rest)
-          .map(({ path, ...rest }) => [path, rest])
+          .map(({ path, ...rest }) => [path, rest]),
       ),
       blobs: Object.fromEntries(
         tree
           .filter((n) => n.type === 'blob' && isFile(n.path) && n.size <= MAX_FILE_SIZE)
-          .map(({ url, mode, size, ...rest }) => rest)
-          .map(({ path, ...rest }) => [path, rest])
+          .map(({
+            url,
+            mode,
+            size,
+            ...rest
+          }) => rest)
+          .map(({ path, ...rest }) => [path, rest]),
       ),
     };
   } catch (e) {
@@ -112,18 +117,17 @@ const callCompromiseApi = async (post, category, postText, type) => {
     RUNNING_REQUESTS[type] = controller;
     try {
       const res = await fetch(
-        `${process.env.REACT_APP_NLP_API_ROOT}/${type}`,
-        {
+        `${process.env.REACT_APP_NLP_API_ROOT}/${type}`, {
           method: 'post',
           mode: 'cors',
           signal: controller.signal,
           body: postText,
           headers: {
-            'Authorization': process.env.REACT_APP_NLP_AUTHORIZATION,
-            'Accept': 'application/json, *',
+            Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
+            Accept: 'application/json, *',
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
       if (!res.ok) {
         throw new Error(JSON.stringify(res.body));
@@ -168,10 +172,10 @@ const callNaturalApi = async (post, category, postText, action) => {
         body: JSON.stringify({ text: postText, action }),
         method: 'post',
         headers: {
-          'Authorization': process.env.REACT_APP_NLP_AUTHORIZATION,
-          'Accept': 'application/json, *',
+          Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
+          Accept: 'application/json, *',
           'Content-Type': 'application/json',
-        }
+        },
       });
       if (!res.ok) {
         throw new Error(JSON.stringify(res.body));
@@ -207,7 +211,7 @@ const define = async (word) => {
         headers: {
           Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
           Accept: 'text/plain, *',
-        }
+        },
       });
       if (!res.ok) {
         throw new Error(JSON.stringify(res.body));
@@ -245,7 +249,7 @@ const getPostHTML = async (sha) => {
             Authorization: process.env.REACT_APP_AUTHORIZATION,
             Accept: 'application/json, *',
           },
-        }
+        },
       );
       if (!res.ok) {
         throw new Error(JSON.stringify(res.body));
