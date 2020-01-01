@@ -1,7 +1,23 @@
 import { basename, join } from 'path-browserify';
 import { parser, lexer } from 'marked';
 
+/**
+ * @typedef Item
+ * @property {string} sha
+ * @property {'blob'|'tree'} type
+ * @property {string} path
+ */
+
+/**
+ * @typedef {Item} ItemRaw
+ * @property {string} url
+ * @property {string} mode
+ * @property {number} size
+ */
+
 import { isDotFile, isFile } from './utils';
+
+const MAX_FILE_SIZE = 10000;
 
 const RUNNING_REQUESTS = {
   allData: undefined,
@@ -24,7 +40,7 @@ const CACHE = {
 };
 
 /**
- * @returns {Promise<{tree: Record<string, *>}|null>}
+ * @returns {Promise<{blobs: Array<Item>, trees: Array<Item>}|null>}
  */
 const getBlogData = async () => {
   if (RUNNING_REQUESTS.allData !== undefined) {
@@ -44,10 +60,21 @@ const getBlogData = async () => {
     if (!res.ok) {
       throw new Error(JSON.stringify(res.body));
     }
-    const json = await res.json();
+    let { tree } = await res.json();
+    tree = tree.filter((n) => !isDotFile(n.path)).map((n) => ({ ...n, path: `/${n.path}` })).sort((a, b) => basename(a.path).localeCompare(basename(b.path)));
     result = {
-      ...json,
-      tree: json.tree.filter((n) => !isDotFile(n.path) && (basename(n.path).indexOf('.') < 0 || isFile(n.path))).map((n) => ({ ...n, path: `/${n.path}` })),
+      trees: Object.fromEntries(
+        tree
+          .filter((n) => n.type === 'tree' && basename(n.path).indexOf('.') < 0)
+          .map(({ url, mode, ...rest }) => rest)
+          .map(({ path, ...rest }) => [path, rest])
+      ),
+      blobs: Object.fromEntries(
+        tree
+          .filter((n) => n.type === 'blob' && isFile(n.path) && n.size <= MAX_FILE_SIZE)
+          .map(({ url, mode, size, ...rest }) => rest)
+          .map(({ path, ...rest }) => [path, rest])
+      ),
     };
   } catch (e) {
     console.error(e);
