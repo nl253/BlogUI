@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { Component } from 'react';
 
 import { Spinner } from 'reactstrap';
@@ -160,7 +161,7 @@ export default class App extends Component {
       postText: '',
     });
     try {
-      const postText = await getPostHTML(blobs[newPost].sha);
+      const postText = await getPostHTML(blobs[newPost]);
       this.setState({ postText });
       this.endLoading('postText');
       if (this.state.postText) {
@@ -188,25 +189,33 @@ export default class App extends Component {
     const p = Promise.all([
       ...this.naturalApiRequests.map(async (type) => {
         const { post: p2, category } = this.state;
-        const newState = await callNaturalApi(p2, category, postBody, type);
-        if (newState) {
-          this.setState({
-            // eslint-disable-next-line react/no-access-state-in-setstate
-            [type]: newState,
-          });
+        try {
+          const newState = await callNaturalApi(p2, category, postBody, type);
+          if (newState) {
+            this.setState({
+              // eslint-disable-next-line react/no-access-state-in-setstate
+              [type]: newState,
+            });
+          }
+          // eslint-disable-next-line no-empty
+        } catch (e) {} finally {
+          this.endLoading(type);
         }
-        this.endLoading(type);
       }),
       ...this.compromiseApiRequests.map(async (type) => {
         const { post: p2, category } = this.state;
-        const newState = await callCompromiseApi(p2, category, postBody, type);
-        if (newState && newState.length > 0) {
-          this.setState({
-            // eslint-disable-next-line react/no-access-state-in-setstate
-            [type]: newState,
-          });
+        try {
+          const newState = await callCompromiseApi(p2, category, postBody, type);
+          if (newState && newState.length > 0) {
+            this.setState({
+              // eslint-disable-next-line react/no-access-state-in-setstate
+              [type]: newState,
+            });
+          }
+          // eslint-disable-next-line no-empty
+        } catch (e) {} finally {
+          this.endLoading(type);
         }
-        this.endLoading(type);
       }),
     ]);
     this.makeClickable('#post-text p, #post-text li');
@@ -252,6 +261,7 @@ export default class App extends Component {
           }
         } catch (e) {
           console.error(e);
+          this.setState({ word, definition: 'definition not found' });
         } finally {
           this.endLoading('word');
         }
