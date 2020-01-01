@@ -67,7 +67,21 @@ const isDotFile = (path) => basename(path)[0] === '.';
  */
 const isFile = (path) => path.search(REGEX_FILE_END_MD) >= 0;
 
+/**
+ * @param {Record<*, *>} obj
+ * @returns {boolean}
+ */
+const isObjectEmpty = (obj) => {
+  for (const prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      return false;
+    }
+  }
+  return true;
+};
+
 export {
+  isObjectEmpty,
   fmtHeading,
   countSent,
   countWords,
