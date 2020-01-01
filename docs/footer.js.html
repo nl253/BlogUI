@@ -28,58 +28,61 @@
         <article>
             <pre class="prettyprint source linenums"><code>import React from 'react';
 
+
 /**
  * @param {string} author
  * @returns {*}
  */
-export default ({ author }) => (
-  &lt;footer
-    className="py-4 bg-light d-none d-xl-block d-lg-block d-md-block d-sm-block border-top mt-xl-3 mt-1 mt-lg-3 mt-md-1 mt-sm-1"
-  >
-    &lt;div className="mx-auto mt-2 mb-4" style={{ maxWidth: '370px' }}>
-      &lt;span className="mr-3">
-        &lt;a
-          href="https://www.linkedin.com/in/norbert-logiewa"
-          className="btn btn-sm btn-secondary"
-          style={{ minWidth: '80px' }}
-        >
+export default function Footer({ author }) {
+  return (
+    &lt;footer
+      className="py-4 bg-light d-none d-xl-block d-lg-block d-md-block d-sm-block border-top mt-xl-3 mt-1 mt-lg-3 mt-md-1 mt-sm-1"
+    >
+      &lt;div className="mx-auto mt-2 mb-4" style={{ maxWidth: '370px' }}>
+        &lt;span className="mr-3">
+          &lt;a
+            href="https://www.linkedin.com/in/norbert-logiewa"
+            className="btn btn-sm btn-secondary"
+            style={{ minWidth: '80px' }}
+          >
                   LinkedIn
-        &lt;/a>
-      &lt;/span>
-      &lt;span className="mr-3">
-        &lt;a
-          href="https://github.com/nl253"
-          className="btn btn-sm btn-secondary"
-          style={{ minWidth: '80px' }}
-        >
+          &lt;/a>
+        &lt;/span>
+        &lt;span className="mr-3">
+          &lt;a
+            href="https://github.com/nl253"
+            className="btn btn-sm btn-secondary"
+            style={{ minWidth: '80px' }}
+          >
                   GitHub
-        &lt;/a>
-      &lt;/span>
-      &lt;span className="mr-3">
-        &lt;a
-          href="https://docs.google.com/document/d/1I94ZHc_75a2ivyjcDXjESIrGYPmJUriTm3xmEkcwaeI/edit?usp=sharing"
-          className="btn btn-sm btn-secondary"
-          style={{ minWidth: '80px' }}
-        >
+          &lt;/a>
+        &lt;/span>
+        &lt;span className="mr-3">
+          &lt;a
+            href="https://docs.google.com/document/d/1I94ZHc_75a2ivyjcDXjESIrGYPmJUriTm3xmEkcwaeI/edit?usp=sharing"
+            className="btn btn-sm btn-secondary"
+            style={{ minWidth: '80px' }}
+          >
                   CV
-        &lt;/a>
-      &lt;/span>
-      &lt;span>
-        &lt;a
-          href="https://portfolio-nl.herokuapp.com"
-          className="btn btn-sm btn-secondary"
-          style={{ minWidth: '80px' }}
-        >
+          &lt;/a>
+        &lt;/span>
+        &lt;span>
+          &lt;a
+            href="https://portfolio-nl.herokuapp.com"
+            className="btn btn-sm btn-secondary"
+            style={{ minWidth: '80px' }}
+          >
                   Portfolio
-        &lt;/a>
-      &lt;/span>
-    &lt;/div>
-    &lt;p
-      className="text-center mx-auto"
-    >Copyright &amp;copy; {author} {new Date(Date.now()).getFullYear().toString()}
-    &lt;/p>
-  &lt;/footer>
-);
+          &lt;/a>
+        &lt;/span>
+      &lt;/div>
+      &lt;p
+        className="text-center mx-auto"
+      >Copyright &amp;copy; {author} {new Date(Date.now()).getFullYear().toString()}
+      &lt;/p>
+    &lt;/footer>
+  );
+}
 </code></pre>
         </article>
     </section>
@@ -90,13 +93,13 @@ export default ({ author }) => (
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#absCategory">absCategory</a></li><li><a href="global.html#absPost">absPost</a></li><li><a href="global.html#beginLoading">beginLoading</a></li><li><a href="global.html#callCompromiseApi">callCompromiseApi</a></li><li><a href="global.html#callNaturalApi">callNaturalApi</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#checkValidServiceWorker">checkValidServiceWorker</a></li><li><a href="global.html#countSent">countSent</a></li><li><a href="global.html#countWords">countWords</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#didLoad">didLoad</a></li><li><a href="global.html#endLoading">endLoading</a></li><li><a href="global.html#findAllMatches">findAllMatches</a></li><li><a href="global.html#fmtHeading">fmtHeading</a></li><li><a href="global.html#getBlogData">getBlogData</a></li><li><a href="global.html#getPostBody">getPostBody</a></li><li><a href="global.html#getPostHTML">getPostHTML</a></li><li><a href="global.html#getTimeToReadInMin">getTimeToReadInMin</a></li><li><a href="global.html#initPostText">initPostText</a></li><li><a href="global.html#isDotFile">isDotFile</a></li><li><a href="global.html#isFile">isFile</a></li><li><a href="global.html#isObjectEmpty">isObjectEmpty</a></li><li><a href="global.html#makeClickable">makeClickable</a></li><li><a href="global.html#parentCategories">parentCategories</a></li><li><a href="global.html#parentCategory">parentCategory</a></li><li><a href="global.html#parentPosts">parentPosts</a></li><li><a href="global.html#posts">posts</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#registerDefinitionsOnWordClick">registerDefinitionsOnWordClick</a></li><li><a href="global.html#registerValidSW">registerValidSW</a></li><li><a href="global.html#render">render</a></li><li><a href="global.html#unique">unique</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#absCategory">absCategory</a></li><li><a href="global.html#absPost">absPost</a></li><li><a href="global.html#beginLoading">beginLoading</a></li><li><a href="global.html#callCompromiseApi">callCompromiseApi</a></li><li><a href="global.html#callNaturalApi">callNaturalApi</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#checkValidServiceWorker">checkValidServiceWorker</a></li><li><a href="global.html#componentDidMount">componentDidMount</a></li><li><a href="global.html#countSent">countSent</a></li><li><a href="global.html#countWords">countWords</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#didLoad">didLoad</a></li><li><a href="global.html#endLoading">endLoading</a></li><li><a href="global.html#findAllMatches">findAllMatches</a></li><li><a href="global.html#fmtHeading">fmtHeading</a></li><li><a href="global.html#getBlogData">getBlogData</a></li><li><a href="global.html#getPostBody">getPostBody</a></li><li><a href="global.html#getPostHTML">getPostHTML</a></li><li><a href="global.html#getTimeToReadInMin">getTimeToReadInMin</a></li><li><a href="global.html#initPostText">initPostText</a></li><li><a href="global.html#isDotFile">isDotFile</a></li><li><a href="global.html#isFile">isFile</a></li><li><a href="global.html#isObjectEmpty">isObjectEmpty</a></li><li><a href="global.html#makeClickable">makeClickable</a></li><li><a href="global.html#parentCategories">parentCategories</a></li><li><a href="global.html#parentCategory">parentCategory</a></li><li><a href="global.html#parentPosts">parentPosts</a></li><li><a href="global.html#posts">posts</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#registerDefinitionsOnWordClick">registerDefinitionsOnWordClick</a></li><li><a href="global.html#registerValidSW">registerValidSW</a></li><li><a href="global.html#render">render</a></li><li><a href="global.html#unique">unique</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Jan 01 2020 11:03:52 GMT+0000 (Greenwich Mean Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Jan 01 2020 12:23:49 GMT+0000 (Greenwich Mean Time)
 </footer>
 
 <script> prettyPrint(); </script>

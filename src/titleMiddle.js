@@ -4,8 +4,14 @@ import { basename } from 'path-browserify';
 
 import { fmtHeading } from './utils';
 
-export default ({ absCategory, category, parentCategory }) => (
-  category === '/'
+/**
+ * @param {function} absCategory
+ * @param {string} category
+ * @param {string} parentCategory
+ * @returns {*}
+ */
+export default function TitleMiddle({ absCategory, category, parentCategory }) {
+  return category === '/'
     ? (
       <div>
         <h1 className="text-center mx-auto display-4">Blog</h1>
@@ -23,5 +29,5 @@ export default ({ absCategory, category, parentCategory }) => (
           Back
         </button>
       </div>
-    )
-);
+    );
+}

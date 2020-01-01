@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: wordDefinition.js</title>
+    <title>JSDoc: Source: parentPosts.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: wordDefinition.js</h1>
+    <h1 class="page-title">Source: parentPosts.js</h1>
 
     
 
@@ -27,45 +27,42 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>import React from 'react';
-import {
-  Button,
-  Toast,
-  ToastBody,
-  ToastHeader,
-} from 'reactstrap';
+import { join } from 'path-browserify';
+import { fmtHeading } from './utils';
 
 /**
- * @param {string} word
- * @param {string} definition
- * @param {function} clearDefinition
+ * @param {function} absPost
+ * @param {string} parentCategory
+ * @param {string[]} parentPosts
+ * @param {string} post
+ * @param {string[]} parentCategories
  * @returns {*}
  */
-export default function WordDefinition({ word, definition, clearDefinition }) {
+export default function ParentPosts({
+  absPost,
+  parentCategory,
+  parentPosts,
+  post,
+  parentCategories,
+}) {
   return (
-    &lt;div hidden={!word || !definition}>
-      &lt;Toast
-        className="d-sm-none d-md-none d-lg-block d-xl-block"
-        style={{
-          position: 'fixed',
-          zIndex: 99,
-          bottom: '10px',
-          left: '10px',
-        }}
-        transition={{
-          exit: false, timeout: 10, enter: true, appear: true,
-        }}
-      >
-        &lt;ToastHeader>{word}&lt;/ToastHeader>
-        &lt;ToastBody>{definition}&lt;/ToastBody>
-        &lt;Button
-          onClick={clearDefinition}
-          color="danger"
-          size="sm"
-          className="mx-auto d-block mt-1 mb-2"
-        >
-        Close
-        &lt;/Button>
-      &lt;/Toast>
+    &lt;div hidden={parentPosts.length === 0}>
+      {parentCategories.length > 0 &amp;&amp; &lt;hr style={{ maxWidth: '75%' }} />}
+      &lt;h3 className="text-center mt-3 mx-auto">Posts&lt;/h3>
+      &lt;nav>
+        {parentPosts.map((p) => (
+          &lt;button
+            type="button"
+            onClick={() => absPost(join(parentCategory, p))}
+            key={p}
+            className={`d-block btn mx-auto w-75 btn-${post === p
+              ? 'light'
+              : 'link'}`}
+          >
+            {fmtHeading(p)}
+          &lt;/button>
+        ))}
+      &lt;/nav>
     &lt;/div>
   );
 }
