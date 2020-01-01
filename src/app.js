@@ -64,6 +64,14 @@ export default class App extends Component {
       const path = window.location.pathname;
       if (isFile(path)) {
         this.absPost(path);
+      } else if (path === '/') {
+        const postNames = Object.keys(this.state.data.blobs);
+        let randPost;
+        do {
+          randPost = postNames[Math.floor(Math.random() * postNames.length)];
+        } while ([...randPost].filter((s) => s === '/').length > 2);
+        console.warn(`opening random post ${randPost}`);
+        this.absPost(randPost);
       } else {
         this.absCategory(path);
       }
