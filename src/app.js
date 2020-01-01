@@ -11,7 +11,7 @@ import {
   getBlogData,
   getPostHTML,
 } from './api';
-import { findAllMatches, isFile } from './utils';
+import { findAllMatches, isFile, isObjectEmpty } from './utils';
 
 import Footer from './footer';
 import WordDefinition from './wordDefinition';
@@ -260,7 +260,7 @@ export default class App extends Component {
     for (const img of document.querySelectorAll('img[src]')) {
       const src = img.getAttribute('src');
       if (src && !src.startsWith('http')) {
-        const value = join(process.env.REACT_APP_ASSETSroot, this.state.category.substr(1), src);
+        const value = join(process.env.REACT_APP_ASSETS_ROOT, this.state.category.substr(1), src);
         img.setAttribute('src', value);
       }
     }
@@ -339,11 +339,10 @@ export default class App extends Component {
     const { state, clearDefinition, parentCategory, parentCategories, parentPosts, posts, categories, absCategory, absPost, naturalApiRequests, compromiseApiRequests, didLoad, author } = this;
     const { definition, category, post, word, postText, data: { trees } } = state;
     return (
-      <div hidden={Object.keys(trees).length === 0}>
+      <div hidden={isObjectEmpty(trees)}>
         <WordDefinition
           word={word}
           definition={definition}
-          isOpen={!!definition}
           clearDefinition={clearDefinition}
         />
         <main
@@ -351,7 +350,7 @@ export default class App extends Component {
           style={{ minHeight: '84vh' }}
         >
           <section
-            className="col-xl-2 col-lg-2 d-none d-xl-block d-lg-block d-md-none d-sm-none"
+            className="col-xl-2 col-lg-2 d-xl-block d-lg-block d-md-none d-sm-none d-none"
           >
             <Title
               parentCategory={parentCategory}
@@ -396,21 +395,18 @@ export default class App extends Component {
           </section>
           <section
             hidden={!postText}
-            className="col-xl col-lg col-md-9 col-sm-12 container-fluid row justify-content-around"
+            className="col-xl-8 col-lg-8 col-md-9 col-sm-12 container-fluid row justify-content-around"
           >
-            <div className="col-xl-3 col-lg-3 d-md-none d-sm-none" />
-            <section className="col-xl-6 col-lg-8 col-md-12 col-sm-12">
+            <div className="col-xl-1 col-lg-1 d-xl-block d-lg-block d-md-none d-sm-none d-none" />
+            <section className="col-xl-8 col-lg-8 col-md-12 col-sm-12">
               <div
                 id="post-text"
                 dangerouslySetInnerHTML={{ __html: postText }}
                 className="my-4 my-xl-0 my-lg-0 my-md-4 my-sm-4"
               />
             </section>
-            <div className="col-xl-1 col-lg-1 d-md-none d-sm-none" />
-
-            <section
-              className="col-xl-1 col-lg-1 d-none d-xl-block d-lg-block d-md-none d-sm-none"
-            >
+            <div className="col-xl-1 col-lg-1 d-xl-block d-lg-block d-md-none d-sm-none d-none" />
+            <section className="col-xl-1 col-lg-1 d-xl-block d-lg-block d-md-none d-sm-none d-none">
               <NLPInfo
                 postText={postText}
                 compromiseApiRequests={compromiseApiRequests}
@@ -418,7 +414,7 @@ export default class App extends Component {
                 state={state}
               />
             </section>
-            <div className="col-xl-1 col-lg-1 d-md-none d-sm-none" />
+            <div className="col-xl-1 col-lg-1 d-xl-block d-lg-block d-md-none d-sm-none" />
           </section>
           <div hidden={postText || didLoad.call(this, 'postText')} className="mx-auto my-auto">
             <Spinner style={{ width: '3rem', height: '3rem' }} />

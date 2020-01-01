@@ -29,7 +29,23 @@
             <pre class="prettyprint source linenums"><code>import { basename, join } from 'path-browserify';
 import { parser, lexer } from 'marked';
 
+/**
+ * @typedef Item
+ * @property {string} sha
+ * @property {'blob'|'tree'} type
+ * @property {string} path
+ */
+
+/**
+ * @typedef {Item} ItemRaw
+ * @property {string} url
+ * @property {string} mode
+ * @property {number} size
+ */
+
 import { isDotFile, isFile } from './utils';
+
+const MAX_FILE_SIZE = 5000;
 
 const RUNNING_REQUESTS = {
   allData: undefined,
@@ -52,7 +68,7 @@ const CACHE = {
 };
 
 /**
- * @returns {Promise&lt;{tree: Record&lt;string, *>}|null>}
+ * @returns {Promise&lt;{blobs: Array&lt;Item>, trees: Array&lt;Item>}|null>}
  */
 const getBlogData = async () => {
   if (RUNNING_REQUESTS.allData !== undefined) {
@@ -72,10 +88,21 @@ const getBlogData = async () => {
     if (!res.ok) {
       throw new Error(JSON.stringify(res.body));
     }
-    const json = await res.json();
+    let { tree } = await res.json();
+    tree = tree.filter((n) => !isDotFile(n.path)).map((n) => ({ ...n, path: `/${n.path}` })).sort((a, b) => basename(a.path).localeCompare(basename(b.path)));
     result = {
-      ...json,
-      tree: json.tree.filter((n) => !isDotFile(n.path) &amp;&amp; (basename(n.path).indexOf('.') &lt; 0 || isFile(n.path))).map((n) => ({ ...n, path: `/${n.path}` })),
+      trees: Object.fromEntries(
+        tree
+          .filter((n) => n.type === 'tree' &amp;&amp; basename(n.path).indexOf('.') &lt; 0)
+          .map(({ url, mode, ...rest }) => rest)
+          .map(({ path, ...rest }) => [path, rest])
+      ),
+      blobs: Object.fromEntries(
+        tree
+          .filter((n) => n.type === 'blob' &amp;&amp; isFile(n.path) &amp;&amp; n.size &lt;= MAX_FILE_SIZE)
+          .map(({ url, mode, size, ...rest }) => rest)
+          .map(({ path, ...rest }) => [path, rest])
+      ),
     };
   } catch (e) {
     console.error(e);
@@ -286,13 +313,13 @@ export {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#callCompromiseApi">callCompromiseApi</a></li><li><a href="global.html#callNaturalApi">callNaturalApi</a></li><li><a href="global.html#checkValidServiceWorker">checkValidServiceWorker</a></li><li><a href="global.html#countSent">countSent</a></li><li><a href="global.html#countWords">countWords</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#findAllMatches">findAllMatches</a></li><li><a href="global.html#fmtHeading">fmtHeading</a></li><li><a href="global.html#getBlogData">getBlogData</a></li><li><a href="global.html#getPostHTML">getPostHTML</a></li><li><a href="global.html#getTimeToReadInMin">getTimeToReadInMin</a></li><li><a href="global.html#isDotFile">isDotFile</a></li><li><a href="global.html#isFile">isFile</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#registerValidSW">registerValidSW</a></li><li><a href="global.html#unique">unique</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#absCategory">absCategory</a></li><li><a href="global.html#absPost">absPost</a></li><li><a href="global.html#beginLoading">beginLoading</a></li><li><a href="global.html#callCompromiseApi">callCompromiseApi</a></li><li><a href="global.html#callNaturalApi">callNaturalApi</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#checkValidServiceWorker">checkValidServiceWorker</a></li><li><a href="global.html#countSent">countSent</a></li><li><a href="global.html#countWords">countWords</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#didLoad">didLoad</a></li><li><a href="global.html#endLoading">endLoading</a></li><li><a href="global.html#findAllMatches">findAllMatches</a></li><li><a href="global.html#fmtHeading">fmtHeading</a></li><li><a href="global.html#getBlogData">getBlogData</a></li><li><a href="global.html#getPostBody">getPostBody</a></li><li><a href="global.html#getPostHTML">getPostHTML</a></li><li><a href="global.html#getTimeToReadInMin">getTimeToReadInMin</a></li><li><a href="global.html#initPostText">initPostText</a></li><li><a href="global.html#isDotFile">isDotFile</a></li><li><a href="global.html#isFile">isFile</a></li><li><a href="global.html#isObjectEmpty">isObjectEmpty</a></li><li><a href="global.html#makeClickable">makeClickable</a></li><li><a href="global.html#parentCategories">parentCategories</a></li><li><a href="global.html#parentCategory">parentCategory</a></li><li><a href="global.html#parentPosts">parentPosts</a></li><li><a href="global.html#posts">posts</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#registerDefinitionsOnWordClick">registerDefinitionsOnWordClick</a></li><li><a href="global.html#registerValidSW">registerValidSW</a></li><li><a href="global.html#render">render</a></li><li><a href="global.html#unique">unique</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sun Dec 29 2019 12:05:48 GMT+0000 (Greenwich Mean Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Jan 01 2020 11:03:52 GMT+0000 (Greenwich Mean Time)
 </footer>
 
 <script> prettyPrint(); </script>

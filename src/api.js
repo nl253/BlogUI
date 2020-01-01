@@ -17,7 +17,7 @@ import { parser, lexer } from 'marked';
 
 import { isDotFile, isFile } from './utils';
 
-const MAX_FILE_SIZE = 10000;
+const MAX_FILE_SIZE = 5000;
 
 const RUNNING_REQUESTS = {
   allData: undefined,
