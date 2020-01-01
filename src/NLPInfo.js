@@ -9,7 +9,12 @@ import NLPInfoListSection from './NLPInfoListSection';
  * @param {*} state
  * @returns {*}
  */
-export default ({ compromiseApiRequests, naturalApiRequests, postText, state }) => (
+export default ({
+  compromiseApiRequests,
+  naturalApiRequests,
+  postText,
+  state,
+}) => (
   <div>
     <h3>Info</h3>
     <p className="mb-1">{getTimeToReadInMin(postText)} min read</p>
@@ -24,7 +29,8 @@ export default ({ compromiseApiRequests, naturalApiRequests, postText, state }) 
         .filter((type) => !!state[type])
         .map((type) => (
           <div key={type}>
-            <h4>{type.substr(0, 1).toUpperCase()}{type.substr(1)}</h4>
+            <h4>{type.substr(0, 1).toUpperCase()}{type.substr(1)}
+            </h4>
             <p style={{ fontVariantCaps: 'all-petite-caps' }}>{state[type].toFixed(2)}</p>
           </div>
         ))}

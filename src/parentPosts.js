@@ -2,7 +2,13 @@ import React from 'react';
 import { join } from 'path-browserify';
 import { fmtHeading } from './utils';
 
-export default ({ absPost, parentCategory, parentPosts, post, parentCategories }) => (
+export default ({
+  absPost,
+  parentCategory,
+  parentPosts,
+  post,
+  parentCategories,
+}) => (
   <div hidden={parentPosts.length === 0}>
     {parentCategories.length > 0 && <hr style={{ maxWidth: '75%' }} />}
     <h3 className="text-center mt-3 mx-auto">Posts</h3>

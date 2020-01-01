@@ -48,7 +48,7 @@ const checkValidServiceWorker = async (swUrl, config) => {
       await registerValidSW(swUrl, config);
     }
   } catch (e) {
-    return console.log('No internet connection found. App is running in offline mode.');
+    console.log('No internet connection found. App is running in offline mode.');
   }
 };
 
@@ -65,7 +65,8 @@ export const register = (config) => {
       if (!(window.location.hostname === 'localhost'
         || window.location.hostname === '[::1]'
         || window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4]\d|[01]?\d{1,2})){3}$/))) {
-        return registerValidSW(swUrl, config);
+        await registerValidSW(swUrl, config);
+        return;
       }
       checkValidServiceWorker(swUrl, config);
       await navigator.serviceWorker.ready;

@@ -1,5 +1,10 @@
 import React from 'react';
-import { Button, Toast, ToastBody, ToastHeader } from 'reactstrap';
+import {
+  Button,
+  Toast,
+  ToastBody,
+  ToastHeader,
+} from 'reactstrap';
 
 /**
  * @param {string} word
@@ -17,7 +22,9 @@ export default ({ word, definition, clearDefinition }) => (
         bottom: '10px',
         left: '10px',
       }}
-      transition={{ exit: false, timeout: 10, enter: true, appear: true }}
+      transition={{
+        exit: false, timeout: 10, enter: true, appear: true,
+      }}
     >
       <ToastHeader>{word}</ToastHeader>
       <ToastBody>{definition}</ToastBody>
