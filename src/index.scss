@@ -23,6 +23,10 @@ li {
   max-width: 70% !important;
 }
 
+h1:hover {
+  cursor: pointer;
+}
+
 .btn {
   font-family: $font-family-sans-serif;
   font-variant-caps: all-petite-caps;
@@ -40,4 +44,8 @@ li {
   &:hover {
     font-weight: bold;
   }
+}
+
+pre > code {
+  color: $red;
 }

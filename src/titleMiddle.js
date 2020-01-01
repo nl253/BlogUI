@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events,jsx-a11y/no-noninteractive-element-interactions,max-len */
 import React from 'react';
 
 import { basename } from 'path-browserify';
@@ -14,7 +15,13 @@ export default function TitleMiddle({ absCategory, category, parentCategory }) {
   return category === '/'
     ? (
       <div>
-        <h1 className="text-center mx-auto display-4">Blog</h1>
+        <h1
+          onClick={() => {
+            window.location.pathname = '/';
+          }}
+          className="text-center mx-auto display-4"
+        >Blog
+        </h1>
         <hr style={{ maxWidth: '75%' }} />
       </div>
     )

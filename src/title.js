@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events,jsx-a11y/no-noninteractive-element-interactions,max-len */
 import React from 'react';
 
 import { basename } from 'path-browserify';
@@ -16,7 +17,12 @@ export default function Title({ parentCategory, parentCategories }) {
         parentCategory.length === 1
           ? (
             <div>
-              <h1 className="text-center mx-auto display-4">
+              <h1
+                className="text-center mx-auto display-4"
+                onClick={() => {
+                  window.location.pathname = '/';
+                }}
+              >
               Blog
               </h1>
               <hr style={{ maxWidth: '75%' }} />
