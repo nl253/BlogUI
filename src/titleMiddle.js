@@ -1,6 +1,8 @@
 import React from 'react';
-import { fmtHeading } from './utils';
+
 import { basename } from 'path-browserify';
+
+import { fmtHeading } from './utils';
 
 export default ({ absCategory, category, parentCategory }) => (
   category === '/'

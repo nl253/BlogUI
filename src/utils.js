@@ -73,6 +73,7 @@ const isFile = (path) => path.search(REGEX_FILE_END_MD) >= 0;
  */
 const isObjectEmpty = (obj) => {
   for (const prop in obj) {
+    // eslint-disable-next-line no-prototype-builtins
     if (obj.hasOwnProperty(prop)) {
       return false;
     }
