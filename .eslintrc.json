@@ -9,11 +9,12 @@
   },
   "extends": [
     "eslint:all",
+    "airbnb",
+    "react-app",
+    "plugin:react/recommended",
     "plugin:security/recommended",
     "plugin:promise/recommended",
-    "airbnb",
-    "plugin:react/recommended",
-    "react-app"
+    "plugin:import/warnings"
   ],
   "globals": {
     "Array": true,
@@ -44,7 +45,6 @@
     "filenames",
     "import",
     "promise",
-    "compat",
     "security"
   ],
   "root": true,

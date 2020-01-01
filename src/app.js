@@ -51,6 +51,9 @@ export default class App extends Component {
     this.absPost = this.absPost.bind(this);
   }
 
+  /**
+   * @returns {Promise<void>}
+   */
   async componentDidMount() {
     this.beginLoading('data');
     try {

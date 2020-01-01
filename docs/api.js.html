@@ -83,7 +83,7 @@ const getBlogData = async () => {
       headers: {
         Accept: 'application/json, *',
         Authorization: process.env.REACT_APP_AUTHORIZATION,
-      }
+      },
     });
     if (!res.ok) {
       throw new Error(JSON.stringify(res.body));
@@ -95,13 +95,18 @@ const getBlogData = async () => {
         tree
           .filter((n) => n.type === 'tree' &amp;&amp; basename(n.path).indexOf('.') &lt; 0)
           .map(({ url, mode, ...rest }) => rest)
-          .map(({ path, ...rest }) => [path, rest])
+          .map(({ path, ...rest }) => [path, rest]),
       ),
       blobs: Object.fromEntries(
         tree
           .filter((n) => n.type === 'blob' &amp;&amp; isFile(n.path) &amp;&amp; n.size &lt;= MAX_FILE_SIZE)
-          .map(({ url, mode, size, ...rest }) => rest)
-          .map(({ path, ...rest }) => [path, rest])
+          .map(({
+            url,
+            mode,
+            size,
+            ...rest
+          }) => rest)
+          .map(({ path, ...rest }) => [path, rest]),
       ),
     };
   } catch (e) {
@@ -140,25 +145,24 @@ const callCompromiseApi = async (post, category, postText, type) => {
     RUNNING_REQUESTS[type] = controller;
     try {
       const res = await fetch(
-        `${process.env.REACT_APP_NLP_API_ROOT}/${type}`,
-        {
+        `${process.env.REACT_APP_NLP_API_ROOT}/${type}`, {
           method: 'post',
           mode: 'cors',
           signal: controller.signal,
           body: postText,
           headers: {
-            'Authorization': process.env.REACT_APP_NLP_AUTHORIZATION,
-            'Accept': 'application/json, *',
+            Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
+            Accept: 'application/json, *',
             'Content-Type': 'application/json',
           },
-        }
+        },
       );
       if (!res.ok) {
         throw new Error(JSON.stringify(res.body));
       }
-      const json = await res.json();
-      const regex = /^[\d &amp;,.a-z]{2,}$/i;
-      result = unique(json.filter((w) => w.search(regex) >= 0));
+      const words = await res.json();
+      const regex = /^[0-9&amp;,.a-z]{2,}$/i;
+      result = unique(words.filter((w) => w.split(/\s+/g).reduce((ok, word) => ok &amp;&amp; word.search(regex) >= 0, true)));
       CACHE[type][postPath] = result;
     } catch (e) {
       CACHE[type][postPath] = null;
@@ -196,10 +200,10 @@ const callNaturalApi = async (post, category, postText, action) => {
         body: JSON.stringify({ text: postText, action }),
         method: 'post',
         headers: {
-          'Authorization': process.env.REACT_APP_NLP_AUTHORIZATION,
-          'Accept': 'application/json, *',
+          Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
+          Accept: 'application/json, *',
           'Content-Type': 'application/json',
-        }
+        },
       });
       if (!res.ok) {
         throw new Error(JSON.stringify(res.body));
@@ -235,7 +239,7 @@ const define = async (word) => {
         headers: {
           Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
           Accept: 'text/plain, *',
-        }
+        },
       });
       if (!res.ok) {
         throw new Error(JSON.stringify(res.body));
@@ -273,7 +277,7 @@ const getPostHTML = async (sha) => {
             Authorization: process.env.REACT_APP_AUTHORIZATION,
             Accept: 'application/json, *',
           },
-        }
+        },
       );
       if (!res.ok) {
         throw new Error(JSON.stringify(res.body));
@@ -313,13 +317,13 @@ export {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#absCategory">absCategory</a></li><li><a href="global.html#absPost">absPost</a></li><li><a href="global.html#beginLoading">beginLoading</a></li><li><a href="global.html#callCompromiseApi">callCompromiseApi</a></li><li><a href="global.html#callNaturalApi">callNaturalApi</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#checkValidServiceWorker">checkValidServiceWorker</a></li><li><a href="global.html#countSent">countSent</a></li><li><a href="global.html#countWords">countWords</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#didLoad">didLoad</a></li><li><a href="global.html#endLoading">endLoading</a></li><li><a href="global.html#findAllMatches">findAllMatches</a></li><li><a href="global.html#fmtHeading">fmtHeading</a></li><li><a href="global.html#getBlogData">getBlogData</a></li><li><a href="global.html#getPostBody">getPostBody</a></li><li><a href="global.html#getPostHTML">getPostHTML</a></li><li><a href="global.html#getTimeToReadInMin">getTimeToReadInMin</a></li><li><a href="global.html#initPostText">initPostText</a></li><li><a href="global.html#isDotFile">isDotFile</a></li><li><a href="global.html#isFile">isFile</a></li><li><a href="global.html#isObjectEmpty">isObjectEmpty</a></li><li><a href="global.html#makeClickable">makeClickable</a></li><li><a href="global.html#parentCategories">parentCategories</a></li><li><a href="global.html#parentCategory">parentCategory</a></li><li><a href="global.html#parentPosts">parentPosts</a></li><li><a href="global.html#posts">posts</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#registerDefinitionsOnWordClick">registerDefinitionsOnWordClick</a></li><li><a href="global.html#registerValidSW">registerValidSW</a></li><li><a href="global.html#render">render</a></li><li><a href="global.html#unique">unique</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#absCategory">absCategory</a></li><li><a href="global.html#absPost">absPost</a></li><li><a href="global.html#beginLoading">beginLoading</a></li><li><a href="global.html#callCompromiseApi">callCompromiseApi</a></li><li><a href="global.html#callNaturalApi">callNaturalApi</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#checkValidServiceWorker">checkValidServiceWorker</a></li><li><a href="global.html#componentDidMount">componentDidMount</a></li><li><a href="global.html#countSent">countSent</a></li><li><a href="global.html#countWords">countWords</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#didLoad">didLoad</a></li><li><a href="global.html#endLoading">endLoading</a></li><li><a href="global.html#findAllMatches">findAllMatches</a></li><li><a href="global.html#fmtHeading">fmtHeading</a></li><li><a href="global.html#getBlogData">getBlogData</a></li><li><a href="global.html#getPostBody">getPostBody</a></li><li><a href="global.html#getPostHTML">getPostHTML</a></li><li><a href="global.html#getTimeToReadInMin">getTimeToReadInMin</a></li><li><a href="global.html#initPostText">initPostText</a></li><li><a href="global.html#isDotFile">isDotFile</a></li><li><a href="global.html#isFile">isFile</a></li><li><a href="global.html#isObjectEmpty">isObjectEmpty</a></li><li><a href="global.html#makeClickable">makeClickable</a></li><li><a href="global.html#parentCategories">parentCategories</a></li><li><a href="global.html#parentCategory">parentCategory</a></li><li><a href="global.html#parentPosts">parentPosts</a></li><li><a href="global.html#posts">posts</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#registerDefinitionsOnWordClick">registerDefinitionsOnWordClick</a></li><li><a href="global.html#registerValidSW">registerValidSW</a></li><li><a href="global.html#render">render</a></li><li><a href="global.html#unique">unique</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Jan 01 2020 11:03:52 GMT+0000 (Greenwich Mean Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Jan 01 2020 12:23:49 GMT+0000 (Greenwich Mean Time)
 </footer>
 
 <script> prettyPrint(); </script>

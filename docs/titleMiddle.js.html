@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: wordDefinition.js</title>
+    <title>JSDoc: Source: titleMiddle.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: wordDefinition.js</h1>
+    <h1 class="page-title">Source: titleMiddle.js</h1>
 
     
 
@@ -27,47 +27,37 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>import React from 'react';
-import {
-  Button,
-  Toast,
-  ToastBody,
-  ToastHeader,
-} from 'reactstrap';
+
+import { basename } from 'path-browserify';
+
+import { fmtHeading } from './utils';
 
 /**
- * @param {string} word
- * @param {string} definition
- * @param {function} clearDefinition
+ * @param {function} absCategory
+ * @param {string} category
+ * @param {string} parentCategory
  * @returns {*}
  */
-export default function WordDefinition({ word, definition, clearDefinition }) {
-  return (
-    &lt;div hidden={!word || !definition}>
-      &lt;Toast
-        className="d-sm-none d-md-none d-lg-block d-xl-block"
-        style={{
-          position: 'fixed',
-          zIndex: 99,
-          bottom: '10px',
-          left: '10px',
-        }}
-        transition={{
-          exit: false, timeout: 10, enter: true, appear: true,
-        }}
-      >
-        &lt;ToastHeader>{word}&lt;/ToastHeader>
-        &lt;ToastBody>{definition}&lt;/ToastBody>
-        &lt;Button
-          onClick={clearDefinition}
-          color="danger"
-          size="sm"
-          className="mx-auto d-block mt-1 mb-2"
+export default function TitleMiddle({ absCategory, category, parentCategory }) {
+  return category === '/'
+    ? (
+      &lt;div>
+        &lt;h1 className="text-center mx-auto display-4">Blog&lt;/h1>
+        &lt;hr style={{ maxWidth: '75%' }} />
+      &lt;/div>
+    )
+    : (
+      &lt;div>
+        &lt;h2>{fmtHeading(basename(category))}&lt;/h2>
+        &lt;button
+          type="button"
+          className="btn btn-light d-block w-50 mx-auto border"
+          onClick={() => absCategory(parentCategory)}
         >
-        Close
-        &lt;/Button>
-      &lt;/Toast>
-    &lt;/div>
-  );
+          Back
+        &lt;/button>
+      &lt;/div>
+    );
 }
 </code></pre>
         </article>

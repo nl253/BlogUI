@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: wordDefinition.js</title>
+    <title>JSDoc: Source: parentCategories.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: wordDefinition.js</h1>
+    <h1 class="page-title">Source: parentCategories.js</h1>
 
     
 
@@ -27,46 +27,37 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>import React from 'react';
-import {
-  Button,
-  Toast,
-  ToastBody,
-  ToastHeader,
-} from 'reactstrap';
+import { join } from 'path-browserify';
+import { fmtHeading } from './utils';
 
 /**
- * @param {string} word
- * @param {string} definition
- * @param {function} clearDefinition
+ * @param {function} absCategory
+ * @param {string} category
+ * @param {string[]} parentCategories
+ * @param {string} parentCategory
  * @returns {*}
  */
-export default function WordDefinition({ word, definition, clearDefinition }) {
+export default function ParentCategories({
+  absCategory,
+  category,
+  parentCategories,
+  parentCategory,
+}) {
   return (
-    &lt;div hidden={!word || !definition}>
-      &lt;Toast
-        className="d-sm-none d-md-none d-lg-block d-xl-block"
-        style={{
-          position: 'fixed',
-          zIndex: 99,
-          bottom: '10px',
-          left: '10px',
-        }}
-        transition={{
-          exit: false, timeout: 10, enter: true, appear: true,
-        }}
-      >
-        &lt;ToastHeader>{word}&lt;/ToastHeader>
-        &lt;ToastBody>{definition}&lt;/ToastBody>
-        &lt;Button
-          onClick={clearDefinition}
-          color="danger"
-          size="sm"
-          className="mx-auto d-block mt-1 mb-2"
+    &lt;nav hidden={parentCategories.length === 0}>
+      {parentCategories.map((c) => (
+        &lt;button
+          type="button"
+          onClick={() => absCategory(join(parentCategory, c))}
+          key={c}
+          className={`d-block btn mx-auto w-75 btn-${category.substr(1) === c
+            ? 'warning'
+            : 'link'}`}
         >
-        Close
-        &lt;/Button>
-      &lt;/Toast>
-    &lt;/div>
+          {fmtHeading(c)}
+        &lt;/button>
+      ))}
+    &lt;/nav>
   );
 }
 </code></pre>

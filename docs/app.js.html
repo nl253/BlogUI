@@ -79,6 +79,9 @@ export default class App extends Component {
     this.absPost = this.absPost.bind(this);
   }
 
+  /**
+   * @returns {Promise&lt;void>}
+   */
   async componentDidMount() {
     this.beginLoading('data');
     try {
@@ -189,7 +192,7 @@ export default class App extends Component {
       this.setState({ postText });
       this.endLoading('postText');
       if (this.state.postText) {
-        await this.initPostText(this.getPostBody());
+        await this.initPostText(App.getPostBody());
       }
     } catch (e) {
       console.error(e);
@@ -285,10 +288,11 @@ export default class App extends Component {
   }
 
   fixImgSrc() {
+    const { state: { category } } = this;
     for (const img of document.querySelectorAll('img[src]')) {
       const src = img.getAttribute('src');
       if (src &amp;&amp; !src.startsWith('http')) {
-        const value = join(process.env.REACT_APP_ASSETS_ROOT, this.state.category.substr(1), src);
+        const value = join(process.env.REACT_APP_ASSETS_ROOT, category.substr(1), src);
         img.setAttribute('src', value);
       }
     }
@@ -306,7 +310,7 @@ export default class App extends Component {
    */
   endLoading(what) {
     this.setState(({ _loading }) => {
-      for (let i = 0; i &lt; _loading.length; i++) {
+      for (let i = 0; i &lt; _loading.length; i += 1) {
         if (_loading[i] === what) {
           return {
             _loading: _loading.slice(0, i).concat(_loading.slice(i + 1)),
@@ -351,7 +355,7 @@ export default class App extends Component {
    * @param {boolean} [slice]
    * @returns {string}
    */
-  getPostBody(slice = true) {
+  static getPostBody(slice = true) {
     const s = [...document.getElementById('post-text').querySelectorAll('p')].map((p) => p.innerText).join('\n');
     return slice ? s.slice(0, 10000) : s;
   }
@@ -364,8 +368,24 @@ export default class App extends Component {
    * @returns {*}
    */
   render() {
-    const { state, clearDefinition, parentCategory, parentCategories, parentPosts, posts, categories, absCategory, absPost, naturalApiRequests, compromiseApiRequests, didLoad, author } = this;
-    const { definition, category, post, word, postText, data: { trees } } = state;
+    const {
+      absCategory,
+      absPost,
+      author,
+      categories,
+      clearDefinition,
+      compromiseApiRequests,
+      didLoad,
+      naturalApiRequests,
+      parentCategories,
+      parentCategory,
+      parentPosts,
+      posts,
+      state,
+    } = this;
+    const {
+      definition, category, post, word, postText, data: { trees },
+    } = state;
     return (
       &lt;div hidden={isObjectEmpty(trees)}>
         &lt;WordDefinition
@@ -444,7 +464,10 @@ export default class App extends Component {
             &lt;/section>
             &lt;div className="col-xl-1 col-lg-1 d-xl-block d-lg-block d-md-none d-sm-none" />
           &lt;/section>
-          &lt;div hidden={postText || didLoad.call(this, 'postText')} className="mx-auto my-auto">
+          &lt;div
+            hidden={postText || didLoad.call(this, 'postText')}
+            className="mx-auto my-auto"
+          >
             &lt;Spinner style={{ width: '3rem', height: '3rem' }} />
           &lt;/div>
         &lt;/main>
@@ -463,13 +486,13 @@ export default class App extends Component {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#absCategory">absCategory</a></li><li><a href="global.html#absPost">absPost</a></li><li><a href="global.html#beginLoading">beginLoading</a></li><li><a href="global.html#callCompromiseApi">callCompromiseApi</a></li><li><a href="global.html#callNaturalApi">callNaturalApi</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#checkValidServiceWorker">checkValidServiceWorker</a></li><li><a href="global.html#countSent">countSent</a></li><li><a href="global.html#countWords">countWords</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#didLoad">didLoad</a></li><li><a href="global.html#endLoading">endLoading</a></li><li><a href="global.html#findAllMatches">findAllMatches</a></li><li><a href="global.html#fmtHeading">fmtHeading</a></li><li><a href="global.html#getBlogData">getBlogData</a></li><li><a href="global.html#getPostBody">getPostBody</a></li><li><a href="global.html#getPostHTML">getPostHTML</a></li><li><a href="global.html#getTimeToReadInMin">getTimeToReadInMin</a></li><li><a href="global.html#initPostText">initPostText</a></li><li><a href="global.html#isDotFile">isDotFile</a></li><li><a href="global.html#isFile">isFile</a></li><li><a href="global.html#isObjectEmpty">isObjectEmpty</a></li><li><a href="global.html#makeClickable">makeClickable</a></li><li><a href="global.html#parentCategories">parentCategories</a></li><li><a href="global.html#parentCategory">parentCategory</a></li><li><a href="global.html#parentPosts">parentPosts</a></li><li><a href="global.html#posts">posts</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#registerDefinitionsOnWordClick">registerDefinitionsOnWordClick</a></li><li><a href="global.html#registerValidSW">registerValidSW</a></li><li><a href="global.html#render">render</a></li><li><a href="global.html#unique">unique</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#absCategory">absCategory</a></li><li><a href="global.html#absPost">absPost</a></li><li><a href="global.html#beginLoading">beginLoading</a></li><li><a href="global.html#callCompromiseApi">callCompromiseApi</a></li><li><a href="global.html#callNaturalApi">callNaturalApi</a></li><li><a href="global.html#categories">categories</a></li><li><a href="global.html#checkValidServiceWorker">checkValidServiceWorker</a></li><li><a href="global.html#componentDidMount">componentDidMount</a></li><li><a href="global.html#countSent">countSent</a></li><li><a href="global.html#countWords">countWords</a></li><li><a href="global.html#define">define</a></li><li><a href="global.html#didLoad">didLoad</a></li><li><a href="global.html#endLoading">endLoading</a></li><li><a href="global.html#findAllMatches">findAllMatches</a></li><li><a href="global.html#fmtHeading">fmtHeading</a></li><li><a href="global.html#getBlogData">getBlogData</a></li><li><a href="global.html#getPostBody">getPostBody</a></li><li><a href="global.html#getPostHTML">getPostHTML</a></li><li><a href="global.html#getTimeToReadInMin">getTimeToReadInMin</a></li><li><a href="global.html#initPostText">initPostText</a></li><li><a href="global.html#isDotFile">isDotFile</a></li><li><a href="global.html#isFile">isFile</a></li><li><a href="global.html#isObjectEmpty">isObjectEmpty</a></li><li><a href="global.html#makeClickable">makeClickable</a></li><li><a href="global.html#parentCategories">parentCategories</a></li><li><a href="global.html#parentCategory">parentCategory</a></li><li><a href="global.html#parentPosts">parentPosts</a></li><li><a href="global.html#posts">posts</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#registerDefinitionsOnWordClick">registerDefinitionsOnWordClick</a></li><li><a href="global.html#registerValidSW">registerValidSW</a></li><li><a href="global.html#render">render</a></li><li><a href="global.html#unique">unique</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Jan 01 2020 11:03:52 GMT+0000 (Greenwich Mean Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Wed Jan 01 2020 12:23:49 GMT+0000 (Greenwich Mean Time)
 </footer>
 
 <script> prettyPrint(); </script>
