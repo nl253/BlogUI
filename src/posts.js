@@ -3,7 +3,7 @@ import { join } from 'path-browserify';
 import { fmtHeading } from './utils';
 
 /**
- * @param {string} absPost
+ * @param {function} absPost
  * @param {string[]} categories
  * @param {string} category
  * @param {string} post

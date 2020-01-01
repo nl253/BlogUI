@@ -1,10 +1,11 @@
 import { basename, join } from 'path-browserify';
 import { parser, lexer } from 'marked';
+import CACHE from 'localforage';
+
 
 /**
  * @typedef Item
  * @property {string} sha
- * @property {'blob'|'tree'} type
  * @property {string} path
  */
 
@@ -13,6 +14,7 @@ import { parser, lexer } from 'marked';
  * @property {string} url
  * @property {string} mode
  * @property {number} size
+ * @property {'blob'|'tree'} type
  */
 
 import { isDotFile, isFile } from './utils';
@@ -20,8 +22,8 @@ import { isDotFile, isFile } from './utils';
 const MAX_FILE_SIZE = 5000;
 
 const RUNNING_REQUESTS = {
-  allData: undefined,
-  definition: undefined,
+  data: undefined,
+  define: undefined,
   people: undefined,
   places: undefined,
   organizations: undefined,
@@ -29,64 +31,68 @@ const RUNNING_REQUESTS = {
   mdToHtml: undefined,
 };
 
-const CACHE = {
-  definitions: {},
-  postText: {},
-  people: {},
-  places: {},
-  organizations: {},
-  topics: {},
-  sentiment: {},
-};
-
 /**
  * @returns {Promise<{blobs: Array<Item>, trees: Array<Item>}|null>}
  */
 const getBlogData = async () => {
-  if (RUNNING_REQUESTS.allData !== undefined) {
-    RUNNING_REQUESTS.allData.abort();
+  const req = RUNNING_REQUESTS.data;
+  if (req !== undefined) {
+    req.abort();
+    delete RUNNING_REQUESTS.data;
   }
-  let result = null;
-  const controller = new AbortController();
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_ROOT}/trees/master?recursive=1`, {
-      mode: 'cors',
-      signal: controller.signal,
-      headers: {
-        Accept: 'application/json, *',
-        Authorization: process.env.REACT_APP_AUTHORIZATION,
-      },
-    });
-    if (!res.ok) {
-      throw new Error(JSON.stringify(res.body));
+    const result = await CACHE.getItem('data');
+    if (result !== null) {
+      return result;
     }
-    let { tree } = await res.json();
-    tree = tree.filter((n) => !isDotFile(n.path)).map((n) => ({ ...n, path: `/${n.path}` })).sort((a, b) => basename(a.path).localeCompare(basename(b.path)));
-    result = {
-      trees: Object.fromEntries(
-        tree
-          .filter((n) => n.type === 'tree' && basename(n.path).indexOf('.') < 0)
-          .map(({ url, mode, ...rest }) => rest)
-          .map(({ path, ...rest }) => [path, rest]),
-      ),
-      blobs: Object.fromEntries(
-        tree
-          .filter((n) => n.type === 'blob' && isFile(n.path) && n.size <= MAX_FILE_SIZE)
-          .map(({
-            url,
-            mode,
-            size,
-            ...rest
-          }) => rest)
-          .map(({ path, ...rest }) => [path, rest]),
-      ),
-    };
+    throw new Error('could not get cached blog data');
   } catch (e) {
     console.error(e);
-  } finally {
-    delete RUNNING_REQUESTS.allData;
+    const controller = new AbortController();
+    RUNNING_REQUESTS.data = controller;
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_ROOT}/trees/master?recursive=1`, {
+        mode: 'cors',
+        signal: controller.signal,
+        headers: {
+          Accept: 'application/json, *',
+          Authorization: process.env.REACT_APP_AUTHORIZATION,
+        },
+      });
+      if (!res.ok) {
+        throw new Error(JSON.stringify(res.body));
+      }
+      let { tree } = await res.json();
+      tree = tree.filter((n) => !isDotFile(n.path)).map((n) => ({ ...n, path: `/${n.path}` })).sort((a, b) => basename(a.path).localeCompare(basename(b.path)));
+      const result = {
+        trees: Object.fromEntries(
+          tree
+            .filter((n) => n.type === 'tree' && basename(n.path).indexOf('.') < 0)
+            .map(({ url, mode, ...rest }) => rest)
+            .map(({ path, sha }) => [path, sha]),
+        ),
+        blobs: Object.fromEntries(
+          tree
+            .filter((n) => n.type === 'blob' && isFile(n.path) && n.size <= MAX_FILE_SIZE)
+            .map(({
+              type,
+              url,
+              mode,
+              size,
+              ...rest
+            }) => rest)
+            .map(({ path, sha }) => [path, sha]),
+        ),
+      };
+      delete RUNNING_REQUESTS.data;
+      await CACHE.setItem('data', result);
+      return result;
+    } catch (e2) {
+      delete RUNNING_REQUESTS.data;
+      console.error(e2);
+      throw e2;
+    }
   }
-  return result;
 };
 
 const mdToHtmlLocally = (md) => parser(lexer(md));
@@ -105,14 +111,21 @@ const unique = (xs) => [...new Set(xs)];
  * @returns {Promise<*>}
  */
 const callCompromiseApi = async (post, category, postText, type) => {
-  if (RUNNING_REQUESTS[type] !== undefined) {
-    RUNNING_REQUESTS[type].abort();
+  const req = RUNNING_REQUESTS[type];
+  if (req !== undefined) {
+    req.abort();
     delete RUNNING_REQUESTS[type];
   }
   const postPath = join(category, post);
-  const maybeCached = CACHE[type][postPath];
-  let result = null;
-  if (maybeCached === undefined) {
+  const cacheKey = `${type}::${postPath}`;
+  try {
+    const result = await CACHE.getItem(cacheKey);
+    if (result !== null) {
+      return result;
+    }
+    throw new Error(`could not get cached ${type} for post ${post} in category ${category}`);
+  } catch (e) {
+    console.warn(e);
     const controller = new AbortController();
     RUNNING_REQUESTS[type] = controller;
     try {
@@ -134,18 +147,17 @@ const callCompromiseApi = async (post, category, postText, type) => {
       }
       const words = await res.json();
       const regex = /^[0-9&,.a-z]{2,}$/i;
-      result = unique(words.filter((w) => w.split(/\s+/g).reduce((ok, word) => ok && word.search(regex) >= 0, true)));
-      CACHE[type][postPath] = result;
-    } catch (e) {
-      CACHE[type][postPath] = null;
-      console.error(e);
-    } finally {
+      const result = unique(words.filter((w) => w.split(/\s+/g).reduce((ok, word) => ok && word.search(regex) >= 0, true)));
+      await CACHE.setItem(cacheKey, result);
       delete RUNNING_REQUESTS[type];
+      return result;
+    } catch (e2) {
+      delete RUNNING_REQUESTS[type];
+      console.error(e2);
+      await CACHE.removeItem(cacheKey);
+      throw e2;
     }
-  } else if (maybeCached) {
-    result = maybeCached;
   }
-  return result;
 };
 
 /**
@@ -155,14 +167,21 @@ const callCompromiseApi = async (post, category, postText, type) => {
  * @param {'distance'|'match'|'sentiment'|'stem'|'tokenize'|'tokenizeAndStem'} action
  */
 const callNaturalApi = async (post, category, postText, action) => {
-  if (RUNNING_REQUESTS[action] !== undefined) {
-    RUNNING_REQUESTS[action].abort();
+  const postPath = join(category, post);
+  const cacheKey = `${action}::${postPath}`;
+  const req = RUNNING_REQUESTS[action];
+  if (req !== undefined) {
+    req.abort();
     delete RUNNING_REQUESTS[action];
   }
-  let result = null;
-  const postPath = join(category, post);
-  const maybeCached = CACHE[action][postPath];
-  if (maybeCached === undefined) {
+  try {
+    const result = await CACHE.getItem(cacheKey);
+    if (result !== null) {
+      return result;
+    }
+    throw new Error(`could not get cached ${action} for post ${post} in category ${category}`);
+  } catch (e) {
+    console.warn(e);
     const controller = new AbortController();
     RUNNING_REQUESTS[action] = controller;
     try {
@@ -180,18 +199,17 @@ const callNaturalApi = async (post, category, postText, action) => {
       if (!res.ok) {
         throw new Error(JSON.stringify(res.body));
       }
-      result = await res.json();
-      CACHE[action][postPath] = result;
-    } catch (e) {
-      console.error(e);
-      CACHE[action][postPath] = null;
-    } finally {
+      const result = await res.json();
+      await CACHE.setItem(cacheKey, result);
       delete RUNNING_REQUESTS[action];
+      return result;
+    } catch (e2) {
+      console.error(e2);
+      await CACHE.removeItem(cacheKey);
+      delete RUNNING_REQUESTS[action];
+      throw e2;
     }
-  } else if (maybeCached) {
-    result = maybeCached;
   }
-  return result;
 };
 
 /**
@@ -199,11 +217,22 @@ const callNaturalApi = async (post, category, postText, action) => {
  * @returns {Promise<string>}
  */
 const define = async (word) => {
-  const maybeCached = CACHE.definitions[word];
-  let result = null;
-  if (maybeCached === undefined) {
+  const req = RUNNING_REQUESTS.define;
+  if (req !== undefined) {
+    req.abort();
+    delete RUNNING_REQUESTS.define;
+  }
+  const cacheKey = `define::${word}`;
+  try {
+    const result = await CACHE.getItem(cacheKey);
+    if (result !== null) {
+      return result;
+    }
+    throw new Error(`could not get cached word definition for ${word}`);
+  } catch (e) {
+    console.warn(e);
     const controller = new AbortController();
-    RUNNING_REQUESTS.definition = controller;
+    RUNNING_REQUESTS.define = controller;
     try {
       const res = await fetch(`${process.env.REACT_APP_NLP_API_ROOT}/define/${word}`, {
         mode: 'cors',
@@ -216,18 +245,17 @@ const define = async (word) => {
       if (!res.ok) {
         throw new Error(JSON.stringify(res.body));
       }
-      result = await res.text();
-      CACHE.definitions[word] = result;
-    } catch (e) {
-      console.error(e.message);
-      CACHE.definitions[word] = null;
-    } finally {
-      delete RUNNING_REQUESTS.definition;
+      const result = await res.text();
+      await CACHE.setItem(cacheKey, result);
+      delete RUNNING_REQUESTS.define;
+      return result;
+    } catch (e2) {
+      console.error(e2.message);
+      await CACHE.removeItem(cacheKey);
+      delete RUNNING_REQUESTS.define;
+      throw e2;
     }
-  } else if (maybeCached) {
-    result = maybeCached;
   }
-  return result;
 };
 
 /**
@@ -235,9 +263,20 @@ const define = async (word) => {
  * @returns {Promise<string>}
  */
 const getPostHTML = async (sha) => {
-  let result = null;
-  const maybeCached = CACHE.postText[sha];
-  if (maybeCached === undefined) {
+  const cacheKey = `postText::${sha}`;
+  const req = RUNNING_REQUESTS.postText;
+  if (req !== undefined) {
+    req.abort();
+    delete RUNNING_REQUESTS.postText;
+  }
+  try {
+    const result = await CACHE.getItem(cacheKey);
+    if (result !== null) {
+      return result;
+    }
+    throw new Error(`could not get cached post HTML for post with SHA ${sha}`);
+  } catch (e) {
+    console.warn(e);
     const controller = new AbortController();
     RUNNING_REQUESTS.postText = controller;
     try {
@@ -258,17 +297,16 @@ const getPostHTML = async (sha) => {
       const markdown = json.encoding === 'base64'
         ? atob(json.content)
         : json.content;
-      result = mdToHtmlLocally(markdown);
-      CACHE.postText[sha] = result;
-    } catch (e) {
-      console.error(e);
-    } finally {
+      const result = mdToHtmlLocally(markdown);
+      await CACHE.setItem(cacheKey, result);
       delete RUNNING_REQUESTS.postText;
+      return result;
+    } catch (e2) {
+      console.error(e2);
+      delete RUNNING_REQUESTS.postText;
+      throw e2;
     }
-  } else if (maybeCached) {
-    result = maybeCached;
   }
-  return result;
 };
 
 export {
