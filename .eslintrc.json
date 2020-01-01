@@ -55,6 +55,7 @@
     "react/jsx-filename-extension": 1,
     "react/jsx-one-expression-per-line": 0,
     "react/prop-types": 0,
-    "function-call-argument-newline": [2, "never"]
+    "function-call-argument-newline": [2, "never"],
+    "linebreak-style": 0
   }
 }
