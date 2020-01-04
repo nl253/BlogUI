@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import { Spinner } from 'reactstrap';
 import { basename, dirname, join } from 'path-browserify';
 
-import bannedWords from './bannedWords';
+import bannedWords from './bannedWords.json';
 import {
   callCompromiseApi,
   callNaturalApi,

@@ -47,7 +47,7 @@ const getBlogData = async () => {
     }
     throw new Error('could not get cached blog data');
   } catch (e) {
-    console.error(e);
+    console.debug(e);
     const controller = new AbortController();
     RUNNING_REQUESTS.data = controller;
     try {
@@ -125,7 +125,7 @@ const callCompromiseApi = async (post, category, postText, type) => {
     }
     throw new Error(`could not get cached ${type} for post ${post} in category ${category}`);
   } catch (e) {
-    console.warn(e);
+    console.debug(e);
     const controller = new AbortController();
     RUNNING_REQUESTS[type] = controller;
     try {
@@ -181,7 +181,7 @@ const callNaturalApi = async (post, category, postText, action) => {
     }
     throw new Error(`could not get cached ${action} for post ${post} in category ${category}`);
   } catch (e) {
-    console.warn(e);
+    console.debug(e);
     const controller = new AbortController();
     RUNNING_REQUESTS[action] = controller;
     try {
@@ -230,7 +230,7 @@ const define = async (word) => {
     }
     throw new Error(`could not get cached word definition for ${word}`);
   } catch (e) {
-    console.warn(e);
+    console.debug(e);
     const controller = new AbortController();
     RUNNING_REQUESTS.define = controller;
     try {
@@ -276,7 +276,7 @@ const getPostHTML = async (sha) => {
     }
     throw new Error(`could not get cached post HTML for post with SHA ${sha}`);
   } catch (e) {
-    console.warn(e);
+    console.debug(e);
     const controller = new AbortController();
     RUNNING_REQUESTS.postText = controller;
     try {

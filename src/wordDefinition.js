@@ -20,7 +20,7 @@ export default function WordDefinition({ word, definition, clearDefinition }) {
         style={{
           position: 'fixed',
           zIndex: 99,
-          bottom: '10px',
+          bottom: '20px',
           left: '10px',
         }}
         transition={{
