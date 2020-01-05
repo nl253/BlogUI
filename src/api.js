@@ -1,6 +1,7 @@
 import { basename, join } from 'path-browserify';
-import { parser, lexer } from 'marked';
+import { lexer, parser } from 'marked';
 import CACHE from 'localforage';
+import { isDotFile, isFile } from './utils';
 
 
 /**
@@ -17,22 +18,12 @@ import CACHE from 'localforage';
  * @property {'blob'|'tree'} type
  */
 
-import { isDotFile, isFile } from './utils';
-
 const MAX_FILE_SIZE = 5000;
 
-const RUNNING_REQUESTS = {
-  data: undefined,
-  define: undefined,
-  people: undefined,
-  places: undefined,
-  organizations: undefined,
-  topics: undefined,
-  mdToHtml: undefined,
-};
+const RUNNING_REQUESTS = {};
 
 /**
- * @returns {Promise<{blobs: Array<Item>, trees: Array<Item>}|null>}
+ * @returns {Promise<{blobs: Item[], trees: Item[]}|null>}
  */
 const getBlogData = async () => {
   const req = RUNNING_REQUESTS.data;
@@ -95,50 +86,50 @@ const getBlogData = async () => {
   }
 };
 
-const mdToHtmlLocally = (md) => parser(lexer(md));
+// /**
+//  * @param {Array<*>} xs
+//  * @returns {Array<*>}
+//  */
+// const unique = (xs) => [...new Set(xs)];
 
-/**
- * @param {Array<*>} xs
- * @returns {Array<*>}
- */
-const unique = (xs) => [...new Set(xs)];
 
 /**
  * @param {string} post
  * @param {string} category
- * @param {string} postText
- * @param {'places'|'organizations'|'topics'|'people'} type
+ * @param {string} payload
+ * @param {'places'|'organizations'|'topics'|'people'|'sentiment'|'tokenize'} cmd
+ * @param {string} mime
  * @returns {Promise<*>}
  */
-const callCompromiseApi = async (post, category, postText, type) => {
-  const req = RUNNING_REQUESTS[type];
+const callNlpApi = async (post, category, payload, cmd, mime) => {
+  const req = RUNNING_REQUESTS[cmd];
   if (req !== undefined) {
     req.abort();
-    delete RUNNING_REQUESTS[type];
+    delete RUNNING_REQUESTS[cmd];
   }
   const postPath = join(category, post);
-  const cacheKey = `${type}::${postPath}`;
+  const cacheKey = `${cmd}::${postPath}`;
   try {
     const result = await CACHE.getItem(cacheKey);
     if (result !== null) {
       return result;
     }
-    throw new Error(`could not get cached ${type} for post ${post} in category ${category}`);
+    throw new Error(`could not get cached ${cmd} for post ${post} in category ${category}`);
   } catch (e) {
     console.debug(e);
     const controller = new AbortController();
-    RUNNING_REQUESTS[type] = controller;
+    RUNNING_REQUESTS[cmd] = controller;
     try {
       const res = await fetch(
-        `${process.env.REACT_APP_NLP_API_ROOT}/${type}`, {
+        `${process.env.REACT_APP_NLP_API_ROOT}/${cmd}`, {
           method: 'post',
           mode: 'cors',
           signal: controller.signal,
-          body: postText,
+          body: payload,
           headers: {
             Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
-            Accept: 'application/json, *',
-            'Content-Type': 'application/json',
+            Accept: 'application/json, */*',
+            'Content-Type': mime,
           },
         },
       );
@@ -146,13 +137,14 @@ const callCompromiseApi = async (post, category, postText, type) => {
         throw new Error(JSON.stringify(res.body));
       }
       const words = await res.json();
-      const regex = /^[0-9&,.a-z]{2,}$/i;
-      const result = unique(words.filter((w) => w.split(/\s+/g).reduce((ok, word) => ok && word.search(regex) >= 0, true)));
-      await CACHE.setItem(cacheKey, result);
-      delete RUNNING_REQUESTS[type];
+      const result = words;
+      if (process.env.REACT_APP_DEBUG !== '1') {
+        await CACHE.setItem(cacheKey, result);
+      }
+      delete RUNNING_REQUESTS[cmd];
       return result;
     } catch (e2) {
-      delete RUNNING_REQUESTS[type];
+      delete RUNNING_REQUESTS[cmd];
       console.error(e2);
       await CACHE.removeItem(cacheKey);
       throw e2;
@@ -164,51 +156,19 @@ const callCompromiseApi = async (post, category, postText, type) => {
  * @param {string} post
  * @param {string} category
  * @param {string} postText
- * @param {'distance'|'match'|'sentiment'|'stem'|'tokenize'|'tokenizeAndStem'} action
+ * @returns {Promise<number>}
  */
-const callNaturalApi = async (post, category, postText, action) => {
-  const postPath = join(category, post);
-  const cacheKey = `${action}::${postPath}`;
-  const req = RUNNING_REQUESTS[action];
-  if (req !== undefined) {
-    req.abort();
-    delete RUNNING_REQUESTS[action];
-  }
+const getSentiment = async (post, category, postText) => {
   try {
-    const result = await CACHE.getItem(cacheKey);
-    if (result !== null) {
-      return result;
+    const tokens = await callNlpApi(post, category, JSON.stringify({ text: postText, tokenizer: 'RegexpTokenizer' }), 'tokenize', 'application/json');
+    const sentiment = await callNlpApi(post, category, JSON.stringify({ tokens }), 'sentiment', 'application/json');
+    if (sentiment !== 0 && !sentiment) {
+      throw new Error('received invalid sentiment', sentiment);
     }
-    throw new Error(`could not get cached ${action} for post ${post} in category ${category}`);
+    return sentiment;
   } catch (e) {
-    console.debug(e);
-    const controller = new AbortController();
-    RUNNING_REQUESTS[action] = controller;
-    try {
-      const res = await fetch(`${process.env.REACT_APP_NLP_API_ROOT}/natural`, {
-        mode: 'cors',
-        signal: controller.signal,
-        body: JSON.stringify({ text: postText, action }),
-        method: 'post',
-        headers: {
-          Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
-          Accept: 'application/json, *',
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!res.ok) {
-        throw new Error(JSON.stringify(res.body));
-      }
-      const result = await res.json();
-      await CACHE.setItem(cacheKey, result);
-      delete RUNNING_REQUESTS[action];
-      return result;
-    } catch (e2) {
-      console.error(e2);
-      await CACHE.removeItem(cacheKey);
-      delete RUNNING_REQUESTS[action];
-      throw e2;
-    }
+    console.error('failed to get sentiment', e);
+    throw e;
   }
 };
 
@@ -246,7 +206,9 @@ const define = async (word) => {
         throw new Error(JSON.stringify(res.body));
       }
       const result = await res.text();
-      await CACHE.setItem(cacheKey, result);
+      if (process.env.REACT_APP_DEBUG !== '1') {
+        await CACHE.setItem(cacheKey, result);
+      }
       delete RUNNING_REQUESTS.define;
       return result;
     } catch (e2) {
@@ -297,8 +259,10 @@ const getPostHTML = async (sha) => {
       const markdown = json.encoding === 'base64'
         ? atob(json.content)
         : json.content;
-      const result = mdToHtmlLocally(markdown);
-      await CACHE.setItem(cacheKey, result);
+      const result = parser(lexer(markdown));
+      if (process.env.REACT_APP_DEBUG !== '1') {
+        await CACHE.setItem(cacheKey, result);
+      }
       delete RUNNING_REQUESTS.postText;
       return result;
     } catch (e2) {
@@ -311,9 +275,8 @@ const getPostHTML = async (sha) => {
 
 export {
   getBlogData,
-  callCompromiseApi,
-  callNaturalApi,
+  callNlpApi,
   define,
-  mdToHtmlLocally,
+  getSentiment,
   getPostHTML,
 };

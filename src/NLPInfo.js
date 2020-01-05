@@ -2,17 +2,34 @@ import React from 'react';
 import { countSent, countWords, getTimeToReadInMin } from './utils';
 import NLPInfoListSection from './NLPInfoListSection';
 
+/**
+ * @param {number} sentiment
+ * @returns {string}
+ */
+const estimateSentiment = (sentiment) => {
+  if (sentiment === 0) {
+    return 'neutral';
+  }
+  if (sentiment >= 0.75) {
+    return 'very positive';
+  }
+  if (sentiment >= 0.25) {
+    return 'positive';
+  }
+  if (sentiment <= -0.75) {
+    return 'very negative';
+  }
+  return 'negative';
+};
 
 /**
- * @param {string[]} compromiseApiRequests
- * @param {string[]} naturalApiRequests
+ * @param {string[]} nlpApiReqs
  * @param {string} postText
  * @param {Record<string, *>} state
  * @returns {*}
  */
 export default function NLPInfo({
-  compromiseApiRequests,
-  naturalApiRequests,
+  nlpApiReqs,
   postText,
   state,
 }) {
@@ -23,8 +40,8 @@ export default function NLPInfo({
       <p className="mb-1">{countWords(postText)} words</p>
       <p>{countSent(postText)} sentences</p>
       <div>
-        {compromiseApiRequests
-          .filter((type) => !!state[type] && state[type].length > 0)
+        {nlpApiReqs
+          .filter((type) => !!state[type] && Array.isArray(state[type]) && state[type].length > 0)
           .map((type) => (
             <NLPInfoListSection
               key={type}
@@ -32,21 +49,12 @@ export default function NLPInfo({
               items={state[type]}
             />
           ))}
-
-        {naturalApiRequests
-          .filter((type) => !!state[type])
-          .map((type) => (
-            <div key={type}>
-              <h4>{type.substr(0, 1).toUpperCase()}{type.substr(1)}
-              </h4>
-              <p
-                style={{ fontVariantCaps: 'all-petite-caps' }}
-              >{state[type].toFixed(
-                2,
-              )}
-              </p>
-            </div>
-          ))}
+        {state.sentiment !== null && (
+          <div>
+            <h4>Sentiment</h4>
+            <p style={{ fontVariantCaps: 'all-petite-caps' }}>{estimateSentiment(state.sentiment)}</p>
+          </div>
+        )}
       </div>
     </div>
   );

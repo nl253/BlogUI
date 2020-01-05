@@ -6,11 +6,11 @@ import { basename, dirname, join } from 'path-browserify';
 
 import bannedWords from './bannedWords.json';
 import {
-  callCompromiseApi,
-  callNaturalApi,
+  callNlpApi,
   define,
   getBlogData,
   getPostHTML,
+  getSentiment,
 } from './api';
 import { findAllMatches, isFile, isObjectEmpty } from './utils';
 
@@ -29,9 +29,11 @@ export default class App extends Component {
     super(props);
     this.bannedWords = new Set(bannedWords);
     this.author = 'Norbert Logiewa';
-    this.naturalApiRequests = ['sentiment'];
-    this.compromiseApiRequests = [
-      'places', 'organizations', 'topics', 'people',
+    this.nlpApiReqs = [
+      'places',
+      'organizations',
+      'topics',
+      'people',
     ];
     this.state = {
       data: {
@@ -43,9 +45,10 @@ export default class App extends Component {
       definition: null,
       post: null,
       postText: '',
+      // eslint-disable-next-line react/no-unused-state
+      sentiment: null,
       _loading: [],
-      ...Object.fromEntries(this.naturalApiRequests.map((e) => [e, null])),
-      ...Object.fromEntries(this.compromiseApiRequests.map((e) => [e, []])),
+      ...Object.fromEntries(this.nlpApiReqs.map((e) => [e, null])),
     };
     this.clearDefinition = this.clearDefinition.bind(this);
     this.absCategory = this.absCategory.bind(this);
@@ -185,51 +188,46 @@ export default class App extends Component {
    * @returns {Promise<void>}
    */
   async initPostText(postBody) {
-    for (const type of this.naturalApiRequests.concat(this.compromiseApiRequests)) {
+    for (const type of this.nlpApiReqs.concat(['sentiment'])) {
       this.beginLoading(type);
     }
-    for (const type of this.compromiseApiRequests) {
+    for (const type of this.nlpApiReqs) {
       this.setState({ [type]: [] });
     }
-    for (const type of this.naturalApiRequests) {
-      this.setState({ [type]: null });
-    }
-    const p = Promise.all([
-      ...this.naturalApiRequests.map(async (type) => {
-        const { post: p2, category } = this.state;
+    // eslint-disable-next-line react/no-unused-state
+    this.setState({ sentiment: null });
+    const { post, category } = this.state;
+    const jobs = [
+      ...this.nlpApiReqs.map((cmd) => callNlpApi(post, category, postBody, cmd, 'text/plain').then((newState) => {
         try {
-          const newState = await callNaturalApi(p2, category, postBody, type);
-          if (newState) {
-            this.setState({
-              // eslint-disable-next-line react/no-access-state-in-setstate
-              [type]: newState,
-            });
+          if (newState && Array.isArray(newState) && newState.length > 0) {
+            this.setState({ [cmd]: Array.from(new Set(newState.filter((w) => w.search(/\w{2,}/) >= 0))) });
           }
           // eslint-disable-next-line no-empty
-        } catch (e) {} finally {
-          this.endLoading(type);
+        } catch (e) {
+          console.error(`${cmd} not set`, e);
+        } finally {
+          this.endLoading(cmd);
         }
-      }),
-      ...this.compromiseApiRequests.map(async (type) => {
-        const { post: p2, category } = this.state;
+      })),
+      getSentiment(post, category, postBody).then((sentiment) => {
         try {
-          const newState = await callCompromiseApi(p2, category, postBody, type);
-          if (newState && newState.length > 0) {
-            this.setState({
-              // eslint-disable-next-line react/no-access-state-in-setstate
-              [type]: newState,
-            });
-          }
-          // eslint-disable-next-line no-empty
-        } catch (e) {} finally {
-          this.endLoading(type);
+          // eslint-disable-next-line react/no-unused-state
+          this.setState({ sentiment });
+        } catch (e) {
+          console.error('sentiment not set', e);
+        } finally {
+          this.endLoading('sentiment');
         }
       }),
-    ]);
+    ];
     this.makeClickable('#post-text p, #post-text li');
     this.registerDefinitionsOnWordClick('#post-text p .word, #post-text li .word');
     this.fixImgSrc();
-    await p;
+    for (const j of jobs) {
+      // eslint-disable-next-line no-await-in-loop
+      await j;
+    }
   }
 
   /**
@@ -364,9 +362,8 @@ export default class App extends Component {
       author,
       categories,
       clearDefinition,
-      compromiseApiRequests,
       didLoad,
-      naturalApiRequests,
+      nlpApiReqs,
       parentCategories,
       parentCategory,
       parentPosts,
@@ -447,8 +444,7 @@ export default class App extends Component {
             <section className="col-xl-1 col-lg-1 d-xl-block d-lg-block d-md-none d-sm-none d-none">
               <NLPInfo
                 postText={postText}
-                compromiseApiRequests={compromiseApiRequests}
-                naturalApiRequests={naturalApiRequests}
+                nlpApiReqs={nlpApiReqs}
                 state={state}
               />
             </section>
