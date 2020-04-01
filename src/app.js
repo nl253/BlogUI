@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React, { Component } from 'react';
 
 import { Spinner } from 'reactstrap';
@@ -203,7 +202,6 @@ export default class App extends Component {
           if (newState && Array.isArray(newState) && newState.length > 0) {
             this.setState({ [cmd]: Array.from(new Set(newState.filter((w) => w.search(/\w{2,}/) >= 0))) });
           }
-          // eslint-disable-next-line no-empty
         } catch (e) {
           console.error(`${cmd} not set`, e);
         } finally {
@@ -225,7 +223,6 @@ export default class App extends Component {
     this.registerDefinitionsOnWordClick('#post-text p .word, #post-text li .word');
     this.fixImgSrc();
     for (const j of jobs) {
-      // eslint-disable-next-line no-await-in-loop
       await j;
     }
   }

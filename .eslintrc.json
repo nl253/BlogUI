@@ -57,6 +57,7 @@
     "react/prop-types": 0,
     "promise/always-return": 0,
     "function-call-argument-newline": [2, "never"],
+    "no-await-in-loop": 0,
     "no-console": 0,
     "linebreak-style": 0
   }

@@ -40,7 +40,7 @@ export default function Footer({ author }) {
         </span>
         <span>
           <a
-            href="https://portfolio-nl.herokuapp.com"
+            href="https://portfolio.norbert-logiewa.co.uk"
             className="btn btn-sm btn-secondary"
             style={{ minWidth: '80px' }}
           >

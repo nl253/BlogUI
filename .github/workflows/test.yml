@@ -31,15 +31,6 @@ jobs:
       - name: Lint Code
         shell: bash
         run: npm run lint:code
-      - name: Lint Docs
-        shell: bash
-        run: npm run lint:doc
-      - name: Check JSDoc Types
-        shell: bash
-        run: npm run doc
-#      - name: Test Code
-#        shell: bash
-#        run: npm test
       - name: Audit NPM Packages
         if: matrix.node >= 10
         run: npm audit
