@@ -1,0 +1,58 @@
+env:
+  browser: true
+  commonjs: true
+  es6: true
+  jest: true
+  node: false
+  worker: true
+extends:
+  - eslint:all
+  - airbnb
+  - react-app
+  - plugin:react/recommended
+  - plugin:security/recommended
+  - plugin:promise/recommended
+  - plugin:import/warnings
+globals:
+  Array: true
+  Date: true
+  JSON: true
+  Map: true
+  Math: true
+  Number: true
+  Object: true
+  Promise: true
+  Set: true
+  URL: true
+  document: true
+  navigator: true
+  process: true
+  window: true
+parserOptions:
+  codeFrame: false
+  ecmaFeatures:
+    impliedStrict: true
+    jsx: true
+  ecmaVersion: 10
+  sourceType: module
+plugins:
+  - filenames
+  - import
+  - promise
+  - security
+root: true
+rules:
+  react/sort-comp: 0
+  react/destructuring-assignment: 1
+  react/no-array-index-key: 1
+  react/jsx-filename-extension: 1
+  react/jsx-one-expression-per-line: 0
+  react/prop-types: 0
+  promise/always-return: 0
+  function-call-argument-newline:
+    - 2
+    - never
+  no-await-in-loop: 0
+  no-console: 0
+  linebreak-style: 0
+
