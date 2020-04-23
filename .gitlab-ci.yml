@@ -1,0 +1,20 @@
+test:
+  image: ubuntu:latest
+  artifacts:
+    name: "$CI_COMMIT_REF_NAME"
+    paths:
+      - build/
+  script:
+    - apt update
+    - apt install -y curl
+    - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+    - export NVM_DIR="$HOME/.nvm"
+    - '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"'
+    - nvm install 12
+    - nvm use 12
+    - npm install
+    - for i in "$(find -type f -name '*.json' -not -path '**/node_modules/**' | grep -v node_modules)"; do echo $i && npx jsonlint ./$i; done
+    - for i in "$(find -type f -name '*.js' -not -path '**/node_modules/**' | grep -v node_modules)"; do echo $i && npx eslint ./$i; done
+    # - npm audit --json --production &>/dev/null
+    - npx license-checker --excludePackages hn-ui@1.0.0 --summary
+    - npm run-script build
