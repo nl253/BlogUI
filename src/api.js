@@ -38,7 +38,7 @@ const getBlogData = async () => {
     }
     throw new Error('could not get cached blog data');
   } catch (e) {
-    console.debug(e);
+    console.debug(e.message);
     const controller = new AbortController();
     RUNNING_REQUESTS.data = controller;
     try {
@@ -80,7 +80,7 @@ const getBlogData = async () => {
       return result;
     } catch (e2) {
       delete RUNNING_REQUESTS.data;
-      console.error(e2);
+      console.error(e2.message);
       throw e2;
     }
   }
@@ -116,7 +116,7 @@ const callNlpApi = async (post, category, payload, cmd, mime) => {
     }
     throw new Error(`could not get cached ${cmd} for post ${post} in category ${category}`);
   } catch (e) {
-    console.debug(e);
+    console.debug(e.message);
     const controller = new AbortController();
     RUNNING_REQUESTS[cmd] = controller;
     try {
@@ -144,7 +144,7 @@ const callNlpApi = async (post, category, payload, cmd, mime) => {
       return result;
     } catch (e2) {
       delete RUNNING_REQUESTS[cmd];
-      console.error(e2);
+      console.error(e2.message);
       await CACHE.removeItem(cacheKey);
       throw e2;
     }
@@ -166,7 +166,7 @@ const getSentiment = async (post, category, postText) => {
     }
     return sentiment;
   } catch (e) {
-    console.error('failed to get sentiment', e);
+    console.error('failed to get sentiment', e.message);
     throw e;
   }
 };
@@ -189,7 +189,7 @@ const define = async (word) => {
     }
     throw new Error(`could not get cached word definition for ${word}`);
   } catch (e) {
-    console.debug(e);
+    console.debug(e.message);
     const controller = new AbortController();
     RUNNING_REQUESTS.define = controller;
     try {
@@ -236,7 +236,7 @@ const getPostHTML = async (sha) => {
     }
     throw new Error(`could not get cached post HTML for post with SHA ${sha}`);
   } catch (e) {
-    console.debug(e);
+    console.debug(e.message);
     const controller = new AbortController();
     RUNNING_REQUESTS.postText = controller;
     try {
@@ -264,7 +264,7 @@ const getPostHTML = async (sha) => {
       delete RUNNING_REQUESTS.postText;
       return result;
     } catch (e2) {
-      console.error(e2);
+      console.error(e2.message);
       delete RUNNING_REQUESTS.postText;
       throw e2;
     }
