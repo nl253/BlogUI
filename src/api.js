@@ -127,7 +127,6 @@ const callNlpApi = async (post, category, payload, cmd, mime) => {
           signal: controller.signal,
           body: payload,
           headers: {
-            Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
             Accept: 'application/json, */*',
             'Content-Type': mime,
           },
@@ -198,7 +197,6 @@ const define = async (word) => {
         mode: 'cors',
         signal: controller.signal,
         headers: {
-          Authorization: process.env.REACT_APP_NLP_AUTHORIZATION,
           Accept: 'text/plain, *',
         },
       });
